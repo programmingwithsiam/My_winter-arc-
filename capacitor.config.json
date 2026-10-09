@@ -8,6 +8,14 @@
   "plugins": {
     "LocalNotifications": {
       "sound": "winter_arc_alarm.wav"
+    },
+    "SocialLogin": {
+      "providers": {
+        "google": true,
+        "facebook": false,
+        "apple": false
+      },
+      "logLevel": 1
     }
   }
 }

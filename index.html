@@ -19,7 +19,7 @@
 --tx-10:color-mix(in srgb,var(--tx) 10%,transparent);--tx-15:color-mix(in srgb,var(--tx) 15%,transparent);--tx-20:color-mix(in srgb,var(--tx) 20%,transparent);--tx-33:color-mix(in srgb,var(--tx) 33%,transparent);--tx-50:color-mix(in srgb,var(--tx) 50%,transparent);--tx-60:color-mix(in srgb,var(--tx) 60%,transparent);--tx-soft:color-mix(in srgb,var(--tx) 26%,transparent);
 --gold-soft:color-mix(in srgb,var(--gold) 26%,transparent);--danger-soft:color-mix(in srgb,var(--danger) 34%,transparent);--on-soft:color-mix(in srgb,var(--on) 16%,transparent);--bg-soft:color-mix(in srgb,var(--bg) 72%,transparent);
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-*{box-sizing:border-box}html,body{background:var(--bg)}body{margin:0;color:var(--ink);font:15px/1.45 'Hind Siliguri',system-ui,sans-serif;padding-bottom:78px}
+*{box-sizing:border-box}html,body{background:var(--bg)}html{scroll-behavior:smooth;overscroll-behavior-y:contain}body{margin:0;color:var(--ink);font:15px/1.45 'Hind Siliguri',system-ui,sans-serif;padding-bottom:78px;-webkit-overflow-scrolling:touch}
 .w{max-width:600px;margin:0 auto;padding:14px;display:none}.w.a{display:block}h1,.big,.rtm,.nt,h2{font-family:'Outfit','Hind Siliguri',sans-serif}h1{font-size:26px;margin:4px 0 2px}h2{font-size:20px;margin:14px 0 6px}h3{margin:14px 0 6px;font-size:16px}.sub,.d,.note{color:var(--mut);font-size:12px}.sub{font-style:italic;font-size:13px;margin-bottom:8px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin:10px 0;box-shadow:0 2px 10px var(--shadow)}.al{display:flex;align-items:center;gap:10px;cursor:pointer}
 .t{font-size:24px;font-weight:700;min-width:92px}.l{flex:1}
@@ -151,15 +151,21 @@ nav svg{width:22px;height:22px;display:block;margin:0 auto 2px;stroke:currentCol
 .alarm-topic-select{width:100%;padding:10px;margin:4px 0;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit}
 #ed .box{max-height:92svh;overflow:auto}
 #test .ti{background:var(--on);color:var(--onx);box-shadow:0 4px 0 var(--on)}
+.plan-tools{display:flex;justify-content:flex-end;gap:8px;position:sticky;top:0;z-index:2;padding:6px 0;background:var(--bg)}
+#planContent[contenteditable="true"]{outline:1px dashed var(--on);outline-offset:3px;border-radius:8px}
+.weeks-tools{display:flex;justify-content:flex-end;gap:8px;position:sticky;top:0;z-index:2;padding:6px 0;background:var(--bg)}
+#weeksContent[contenteditable="true"]{outline:1px dashed var(--on);outline-offset:3px;border-radius:8px}
+.timer-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px}.timer-presets{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.timer-presets button{border:1px solid var(--line);border-radius:18px;padding:6px 12px;background:var(--row);color:var(--mut)}.timer-status{min-height:20px;margin-top:8px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 </style></head><body>
 <div id="splash"><div class="sp"><svg viewBox="0 0 200 120" width="200"><path class="sm1" d="M20 110L80 40L140 110Z" fill="var(--on)"/><path class="sm2" d="M80 110L135 22L190 110Z" fill="var(--on)"/><path class="sm2" d="M122 40L135 22L148 42L141 38L135 46L129 38Z" fill="var(--tx)"/><path d="M0 110Q60 98 100 106T200 104V120H0Z" fill="var(--bg)"/></svg><h1>My Winter Arc</h1><p>Quiet winter. Loud results.</p><div class="ld"><i></i></div><small>CODEWITHSIAM</small></div></div>
 <div class="badge" id="bd">💾 local</div>
 <div class="w a" id="p0"></div>
-<div class="w alarm-page" id="p1"><h1>⏰ Alarms</h1><div class="sub">Native notifications can ring while the app is closed. Tap an alert to open the full alarm screen.</div><div id="alarmNotice"></div><button class="tst" id="test"><span class="ti">🔔</span><span><b>Test alarm</b><small>Rings in 5 seconds</small></span><span class="go">▶</span></button><div class="alarm-topics" id="alarmTopics" role="group" aria-label="Filter alarms by topic"></div><div id="list"></div></div>
+<div class="w alarm-page" id="p1"><h1>⏰ Alarms</h1><div class="sub">Native notifications can ring while the app is closed. Tap an alert to open the full alarm screen.</div><div id="alarmNotice"></div><section class="card" aria-labelledby="timerHeading"><b id="timerHeading">Custom countdown</b><div class="d">Choose any duration. Native apps can notify you in the background when notifications are enabled.</div><div class="timer-inputs"><label><span class="d">Minutes</span><input id="timerMinutes" type="number" inputmode="numeric" min="0" max="1439" value="4" aria-label="Timer minutes"></label><label><span class="d">Seconds</span><input id="timerSeconds" type="number" inputmode="numeric" min="0" max="59" value="0" aria-label="Timer seconds"></label></div><div class="timer-presets"><button type="button" data-timer-preset="60">1 min</button><button type="button" data-timer-preset="240">4 min</button><button type="button" data-timer-preset="300">5 min</button><button type="button" data-timer-preset="600">10 min</button><button type="button" data-timer-preset="1500">25 min</button></div><div class="row" style="justify-content:flex-start"><button type="button" class="btn" id="timerStart">Start timer</button><button type="button" class="btn g" id="timerCancel" hidden>Cancel timer</button></div><div id="timerStatus" class="d timer-status" role="status" aria-live="polite"></div></section><button class="tst" id="test"><span class="ti">🔔</span><span><b>Test alarm</b><small>Rings in 5 seconds</small></span><span class="go">▶</span></button><div class="alarm-topics" id="alarmTopics" role="group" aria-label="Filter alarms by topic"></div><div id="list"></div></div>
 <div class="w" id="p2"></div><div class="w" id="p3"></div><div class="w" id="p4"></div>
 <button class="btn fab" id="add">+</button>
 <nav><button class="a" data-p="0"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></button><button data-p="1"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M5 3L2 6M19 3l3 3"/></svg><span>Alarms</span></button><button data-p="2"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg><span>90-Day Arc</span></button><button data-p="3"><svg viewBox="0 0 24 24"><path d="M5 4h12a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2zM9 8h6M9 12h6"/></svg><span>Weeks</span></button><button data-p="4"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/></svg><span>Plan</span></button></nav>
-<div class="ov rg" id="ring"><div class="rb"><div class="rp"><i></i><i></i><div class="bell">🔔</div></div><div class="rtm" id="rtm"></div><div class="ringstate">ALARM IS RINGING</div><div class="rnow"><span class="rk">Start now</span><h2 id="rt"></h2><p id="rd"></p></div><div class="row rbt"><button class="btn g" id="snz">Snooze 5 min</button><button class="btn wt" id="stp">Stop</button></div><div class="pvb" id="pv"></div><div class="pvb" id="nxb"></div><p id="rq" class="d" style="color:var(--tx);opacity:.8"></p></div></div>
+<div class="ov rg" id="ring"><div class="rb"><div class="rp"><i></i><i></i><div class="bell">🔔</div></div><div class="rtm" id="rtm"></div><div class="ringstate">ALARM IS RINGING</div><div class="rnow"><span class="rk">Start now</span><h2 id="rt"></h2><p id="rd"></p></div><div class="row rbt"><button class="btn g" id="snz">Snooze 5 min</button><button class="btn wt" id="stp">Stop</button></div><div class="pvb" id="pv"></div><div class="pvb" id="nxb"></div><p id="rq" class="d" style="color:var(--tx);opacity:.8"></p><button class="btn full" id="cnt">Continue to next task</button></div></div>
 <input type="file" accept=".json,application/json" id="imf" hidden><input type="file" accept="image/*" id="cvf" hidden>
 <div class="ov" id="pp"></div>
 <div class="ob" id="ob"><div class="obi" id="obc"></div></div>
@@ -170,24 +176,74 @@ nav svg{width:22px;height:22px;display:block;margin:0 auto 2px;stroke:currentCol
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="./native-auth-config.js"></script>
 <script src="./native-plugins.js"></script>
 <script>
 const WK=[6,7,1,2,3,4],ALL=[1,2,3,4,5,6,7],DN={1:'Mon',2:'Tue',3:'Wed',4:'Thu',5:'Fri',6:'Sat',7:'Sun'},ORD=[6,7,1,2,3,4,5];
+const escapeHTML=value=>String(value).replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const ATOP=[['🕌','Prayer'],['💪','Health'],['📚','Study'],['📝','Exam'],['🔁','Review'],['🗓️','Plan'],['📵','Focus'],['🌙','Sleep']];
 const defaultAlarmTopic=id=>id==1||id==9||id==15||id==17?0:[2,5,10,12,16].includes(id)?1:[3,6,8,11,13,14,18].includes(id)?2:id==4?3:id==19?4:id==20?5:[7,21].includes(id)?6:id==22?7:2;
 const DEF=[[1,'Fajr + water + fresh start',5,30,ALL],[2,'Weigh-in (empty stomach)',5,40,[6,1,3]],[3,'Self-study 1 — Higher Math',5,50,WK],[4,'Friday: Weekly Mock Test',5,30,[5]],[5,'Breakfast',7,20,WK],[6,'Online class A',7,50,WK],[7,'Oats + banana, NO phone',9,50,WK],[8,'Self-study 2 — Biology',10,5,WK],[9,'Zuhr + Lunch',11,35,WK],[10,'Power nap START (20 min)',12,20,WK],[11,'WAKE UP — Online class B',12,40,WK],[12,'Snack + walk',14,40,WK],[13,'Self-study 3 — Phy/Chem',14,50,WK],[14,'Tuition',16,0,WK],[15,'Maghrib soon — 5 min break',17,5,WK],[16,'Gym time 💪',17,30,WK],[17,'Shower + Dinner + Isha',19,20,WK],[18,'Self-study 4 + Mistake Notebook',20,0,WK],[19,'Friday: Mistake analysis',6,50,[5]],[20,'Friday: plan next week',20,0,[5]],[21,'Milk + phone away + tick circle',21,45,ALL],[22,'SLEEP — lights off',22,0,ALL]].map(a=>({id:a[0],label:a[1],h:a[2],m:a[3],days:a[4],on:true,topic:defaultAlarmTopic(a[0]),msg:''}));
 const HB=['Wake on time','Self-study 6h','Online class done','Tuition 1.5h','Gym (Fri off)','Protein-rich food','Water target','5x Salah','Phone-free focus','Revision 30 min','Sleep 7.5h','Mistake Notebook'];
 const $=id=>document.getElementById(id),p2=n=>String(n).padStart(2,'0'),fmt=i=>(i.h%12||12)+':'+p2(i.m)+' '+(i.h<12?'AM':'PM');
-const dS=()=>({items:DEF,cover:'',ach:{},blk:{},achInit:0,name:'',lang:'en',smLim:30,sm:{d:'',used:0,run:0},ob:0,hsc:'',start:null,sel:0,why:'',rule:'',log:{},score:{},mo:{},wk:{},road:{}});
-let S=dS(),sounds={},ref=null,tm=null,auth=null,db=null,authUser=null,cloudMessage='',authChoiceRequired=false,localChangedAt=0,cloudUnsubscribe=null,hasLocalTimestamp=false;
+const dS=()=>({items:DEF.map(i=>({...i,days:[...i.days]})),cover:'',ach:{},blk:{},achInit:0,name:'',lang:'en',smLim:30,sm:{d:'',used:0,run:0},ob:0,hsc:'',start:null,sel:0,why:'',rule:'',log:{},score:{},mo:{},wk:{},road:{},planHtml:null,weeksHtml:null,lastBackup:''});
+let S=dS(),sounds={},ref=null,tm=null,auth=null,db=null,authUser=null,cloudMessage='',authChoiceRequired=false,localChangedAt=0,cloudUnsubscribe=null,hasLocalTimestamp=false,socialLoginReady=null,googleBusy=false,googleMessage='';
 let hasLocalData=false;
-try{const saved=localStorage.getItem('wa2');hasLocalData=!!saved;if(saved)S=Object.assign(dS(),JSON.parse(saved));const timestamp=localStorage.getItem('wa2-updated-at');hasLocalTimestamp=timestamp!==null;localChangedAt=Number(timestamp)||0}catch(e){console.error('Could not load saved Winter Arc data:',e);cloudMessage='Saved data could not be read from this device.'}
+const FORBIDDEN_KEYS=new Set(['__proto__','prototype','constructor']);
+function cloneSafeData(value,depth=0,budget={nodes:0}){
+ if(++budget.nodes>25000||depth>14)throw new Error('Saved data is too large or deeply nested.');
+ if(value===null||typeof value==='boolean')return value;
+ if(typeof value==='string'){if(value.length>150000)throw new Error('A saved text field is too long.');return value}
+ if(typeof value==='number'){if(!Number.isFinite(value))throw new Error('Saved data contains an invalid number.');return value}
+ if(Array.isArray(value)){if(value.length>5000)throw new Error('Saved list is too large.');return value.map(item=>cloneSafeData(item,depth+1,budget))}
+ if(typeof value!=='object'||Object.getPrototypeOf(value)!==Object.prototype&&Object.getPrototypeOf(value)!==null)throw new Error('Saved data contains an unsupported value.');
+ const copy={};
+ for(const key of Object.keys(value)){if(FORBIDDEN_KEYS.has(key))throw new Error('Saved data contains a forbidden property.');copy[key]=cloneSafeData(value[key],depth+1,budget)}
+ return copy;
+}
+function sanitizeState(input){
+ if(!input||typeof input!=='object'||Array.isArray(input))throw new Error('Saved data must be an object.');
+ const data=cloneSafeData(input),state=dS(),allowed=new Set(Object.keys(state));
+ for(const key of Object.keys(data)){
+   if(!allowed.has(key))continue;
+   const value=data[key];
+   if(key==='items'){
+     if(!Array.isArray(value)||value.length>100)throw new Error('Saved alarm list is invalid.');
+     state.items=value.map(item=>{
+       if(!item||typeof item!=='object'||Array.isArray(item)||!Number.isSafeInteger(item.id)||!Number.isInteger(item.h)||item.h<0||item.h>23||!Number.isInteger(item.m)||item.m<0||item.m>59||typeof item.label!=='string'||item.label.length>100||typeof item.on!=='boolean'||!Array.isArray(item.days)||item.days.length>7||item.days.some(day=>!Number.isInteger(day)||day<1||day>7)||item.msg!=null&&typeof item.msg!=='string'||(item.msg||'').length>300)throw new Error('Saved alarm data is invalid.');
+       return {...item,id:item.id,label:item.label.trim(),days:[...new Set(item.days)],topic:Number.isInteger(item.topic)&&item.topic>=0&&item.topic<ATOP.length?item.topic:defaultAlarmTopic(item.id),msg:item.msg||''};
+     });
+   }else if(key==='planHtml'||key==='weeksHtml'){
+     if(value!==null&&typeof value!=='string')throw new Error(`Saved ${key} must be text.`);
+     if(typeof value==='string'&&value.length>300000)throw new Error(`Saved ${key} is too large.`);
+     state[key]=value;
+   }else if(['ach','blk','sm','log','score','mo','wk','road'].includes(key)){
+     if(!value||typeof value!=='object'||Array.isArray(value))throw new Error(`Saved ${key} data is invalid.`);
+     state[key]=value;
+   }else if(['cover','name','lang','why','rule','hsc','lastBackup'].includes(key)){
+     if(typeof value!=='string'||value.length>(key==='cover'?160000:1000))throw new Error(`Saved ${key} data is invalid.`);
+     if(key==='cover'&&value&&!/^data:image\/(?:jpeg|png|webp);base64,[a-z0-9+/]+=*$/i.test(value))throw new Error('Saved cover image must be a local image.');
+     state[key]=value;
+   }else if(['achInit','smLim','ob','sel'].includes(key)){
+     if(typeof value!=='number'||!Number.isFinite(value))throw new Error(`Saved ${key} data is invalid.`);
+     state[key]=value;
+   }else if(key==='start'){
+     if(value!==null&&typeof value!=='string')throw new Error('Saved start date is invalid.');
+     state[key]=value;
+   }
+ }
+ if(!['en','bn'].includes(state.lang))state.lang='en';
+ state.planHtml=typeof state.planHtml==='string'?sanitizePlanHTML(state.planHtml):null;
+ state.weeksHtml=typeof state.weeksHtml==='string'?sanitizeWeeksHTML(state.weeksHtml):null;
+ return state;
+}
+try{const saved=localStorage.getItem('wa2');hasLocalData=!!saved;if(saved){if(saved.length>2*1024*1024)throw new Error('Saved data exceeds the 2 MB safety limit.');S=sanitizeState(JSON.parse(saved))}const timestamp=localStorage.getItem('wa2-updated-at');hasLocalTimestamp=timestamp!==null;localChangedAt=Number(timestamp)||0}catch(e){console.error('Could not safely load saved Winter Arc data:',e);cloudMessage='Saved data could not be read safely. Restore a valid backup or clear this device’s saved app data.'}
 S.items=(Array.isArray(S.items)?S.items:DEF).map(i=>({...i,topic:Number.isInteger(i.topic)&&i.topic>=0&&i.topic<ATOP.length?i.topic:defaultAlarmTopic(i.id),msg:typeof i.msg==='string'?i.msg:''}));
 function storeLocal(){try{localStorage.setItem('wa2',JSON.stringify(S));localStorage.setItem('wa2-updated-at',String(localChangedAt));hasLocalData=true;hasLocalTimestamp=true;return true}catch(e){console.error('Could not save Winter Arc data locally:',e);$('bd').textContent='⚠️ local save failed';cloudMessage='Local save failed: '+e.message;return false}}
 function persist(){localChangedAt=Math.max(Date.now(),localChangedAt+1);const saved=storeLocal();if(!saved)return;if(!ref){$('bd').textContent=authUser?'☁️ waiting for sync':'💾 local';return}clearTimeout(tm);tm=setTimeout(()=>{const changedAt=localChangedAt;ref.set({state:JSON.parse(JSON.stringify(S)),updatedAt:changedAt}).then(()=>{if(changedAt===localChangedAt)$('bd').textContent='☁️ saved'}).catch(e=>{console.error('Could not sync Winter Arc data to Firebase:',e);cloudMessage='Cloud save failed: '+e.message;$('bd').textContent='⚠️ cloud save failed';drawSet()})},700)}
 const getp=p=>p.split('.').reduce((o,k)=>o==null?o:o[k],S);
 function setp(p,v){const a=p.split('.');let o=S;for(let i=0;i<a.length-1;i++)o=o[a[i]]=o[a[i]]||{};o[a[a.length-1]]=v;persist()}
-function applyCloudState(state,updatedAt){S=Object.assign(dS(),state);localChangedAt=Number(updatedAt)||Date.now();storeLocal();renderAll();ob();if(S.lang=='bn')loc(document.body);syncNativeAlarms(true)}
+function applyCloudState(state,updatedAt){S=sanitizeState(state);localChangedAt=Number(updatedAt)||Date.now();storeLocal();renderAll();ob();if(S.lang=='bn')loc(document.body);syncNativeAlarms(true)}
 async function connectCloud(user){
   authUser=user;let notice='';clearTimeout(tm);if(cloudUnsubscribe){cloudUnsubscribe();cloudUnsubscribe=null}
   ref=user?db.collection('users').doc(user.uid).collection('appData').doc('state'):null;
@@ -208,7 +264,7 @@ async function connectCloud(user){
     authChoiceRequired=false;cloudMessage=notice;$('bd').textContent='☁️ synced';
     cloudUnsubscribe=ref.onSnapshot(s=>{
       if(!s.exists||s.metadata.hasPendingWrites)return;
-      const d=s.data();if(d&&d.state&&Number(d.updatedAt)>localChangedAt)applyCloudState(d.state,d.updatedAt);
+      const d=s.data();if(d&&d.state&&Number(d.updatedAt)>localChangedAt){try{applyCloudState(d.state,d.updatedAt)}catch(e){console.error('Rejected unsafe or invalid Firebase app data:',e);cloudMessage='Cloud data was rejected because it is invalid or unsafe.';drawSet()}}
     },e=>{console.error('Firebase sync listener failed:',e);cloudMessage='Cloud sync failed: '+e.message;$('bd').textContent='⚠️ cloud sync failed';drawSet()});
   }catch(e){console.error('Could not load Winter Arc data from Firebase:',e);cloudMessage='Could not load cloud data: '+e.message;$('bd').textContent='⚠️ cloud load failed'}
   drawSet();
@@ -223,6 +279,51 @@ function initFirebase(){
     auth.onAuthStateChanged(user=>connectCloud(user),e=>{console.error('Firebase authentication state failed:',e);cloudMessage='Authentication failed: '+e.message;drawSet()});
   }catch(e){console.error('Could not initialize Firebase:',e);cloudMessage='Firebase setup failed: '+e.message}
 }
+async function initializeNativeGoogleSignIn(){
+  const plugin=window.WinterArcNative&&window.WinterArcNative.SocialLogin,config=window.WINTERARC_NATIVE_AUTH_CONFIG||{},platform=window.WinterArcNative&&window.WinterArcNative.Capacitor.getPlatform();
+  if(!plugin)throw new Error('Native Google sign-in is unavailable. Rebuild the mobile app after syncing dependencies.');
+  if(!config.googleWebClientId)throw new Error('The Android Firebase config is missing a Google Web client ID.');
+  if(platform==='ios'&&!config.googleIosClientId)throw new Error('The iOS Firebase config is missing its Google client ID.');
+  if(!socialLoginReady){
+    const google={webClientId:config.googleWebClientId,mode:'online'};
+    if(platform==='ios'){google.iOSClientId=config.googleIosClientId;google.iOSServerClientId=config.googleWebClientId}
+    socialLoginReady=plugin.initialize({google});
+  }
+  try{await socialLoginReady}catch(error){socialLoginReady=null;throw error}
+}
+async function signInWithGoogle(fromOnboarding=false){
+  if(googleBusy)return;
+  if(!auth){googleMessage='Firebase is not configured yet. Check firebase-config.js.';if(fromOnboarding)ob();else drawSet();return}
+  googleBusy=true;googleMessage='Connecting to Google…';if(fromOnboarding){ob();loc($('ob'))}else drawSet();
+  try{
+    if(nativePlatform()){
+      await initializeNativeGoogleSignIn();
+      const response=await window.WinterArcNative.SocialLogin.login({provider:'google',options:{scopes:['email','profile']}});
+      if(!response.result.idToken)throw new Error('Google did not return an ID token. Check the platform OAuth configuration.');
+      const credential=firebase.auth.GoogleAuthProvider.credential(response.result.idToken);
+      await auth.signInWithCredential(credential);
+    }else{
+      const provider=new firebase.auth.GoogleAuthProvider();
+      provider.addScope('email');provider.addScope('profile');
+      await auth.signInWithPopup(provider);
+    }
+    googleMessage='';
+    if(fromOnboarding&&obs===0){obs=1;ob();loc($('ob'))}
+  }catch(error){
+    console.error('Google sign-in failed:',error);
+    const code=error&&error.code;
+    googleMessage=code==='auth/operation-not-allowed'
+      ?'Google sign-in is disabled in Firebase Authentication. Enable the Google provider and try again.'
+      :code==='auth/unauthorized-domain'
+        ?'This app domain is not authorized in Firebase Authentication.'
+        :error&&/cancel/i.test(error.message||'')
+          ?'Google sign-in was cancelled.'
+          :'Google sign-in failed: '+(error&&error.message||'Unknown error');
+  }finally{
+    googleBusy=false;
+    if(fromOnboarding)ob();else drawSet();
+  }
+}
 // ---------- alarms ----------
 let editing=null;
 let nativeAlarmReady=false,nativeAlarmStatus='',nativeSchedulePromise=null,lastNativeSchedule=0,handledAlarmNotifications=new Set(),currentNotificationId=null;
@@ -236,32 +337,81 @@ function drawA(){S.items.sort((a,b)=>a.h*60+a.m-b.h*60-b.m);drawAlarmTopics();co
 $('list').onclick=e=>{const row=e.target.closest('[data-id]');if(!row)return;const i=S.items.find(x=>x.id==row.dataset.id);if(!i)return;if(e.target.closest('[data-sw]')){i.on=!i.on;persist();drawA();syncNativeAlarms(true)}else if(e.target.closest('[data-day]')){const day=+e.target.closest('[data-day]').dataset.day;i.days=i.days.includes(day)?i.days.filter(d=>d!==day):[...i.days,day].sort((a,b)=>a-b);if(i.days.length){delete i.onceAt}else{const at=new Date();at.setHours(i.h,i.m,0,0);if(at<=new Date())at.setDate(at.getDate()+1);i.onceAt=at.toISOString()}expandedAlarmId=i.id;persist();drawA();syncNativeAlarms(true)}else if(e.target.closest('[data-edit]'))edit(i);else if(e.target.closest('[data-del]')){if(confirm(`Delete “${i.label}”?`)){S.items=S.items.filter(x=>x!==i);if(expandedAlarmId===i.id)expandedAlarmId=null;persist();drawA();syncNativeAlarms(true)}}else{expandedAlarmId=expandedAlarmId===i.id?null:i.id;drawA()}};
 $('alarmTopics').onclick=e=>{const b=e.target.closest('[data-topic-filter]');if(!b)return;alarmFilter=+b.dataset.topicFilter;drawA()};
 function notificationId(kind,alarm,at){let h=2166136261;for(const c of `${kind}:${alarm.id}:${at.toISOString()}:${alarm.label}`)h=Math.imul(h^c.charCodeAt(0),16777619);return (h>>>0)%2147483646+1}
-function upcomingAlarmNotifications(){const now=new Date(),items=[];for(const alarm of S.items){if(!alarm.on)continue;if(!alarm.days.length){const at=new Date(alarm.onceAt);if(alarm.onceAt&&Number.isFinite(at.getTime())&&at>now)items.push({alarm,at});continue}for(let offset=0;offset<7;offset++){const at=new Date(now);at.setDate(now.getDate()+offset);at.setHours(alarm.h,alarm.m,0,0);if(at>now&&alarm.days.includes(at.getDay()||7))items.push({alarm,at})}}return items.sort((a,b)=>a.at-b.at).slice(0,64).map(({alarm,at})=>({id:notificationId('alarm',alarm,at),title:'My Winter Arc · '+alarm.label,body:alarm.msg||DET[alarm.id]||'Your scheduled alarm is ready. Tap to open alarm controls.',schedule:{at},sound:'winter_arc_alarm.wav',extra:{kind:'winter-arc-alarm',alarm:{...alarm},scheduledAt:at.toISOString()}}))}
+function upcomingAlarmNotifications(){const now=new Date(),items=[];for(const alarm of S.items){if(!alarm.on)continue;if(!alarm.days.length){const at=new Date(alarm.onceAt);if(alarm.onceAt&&Number.isFinite(at.getTime())&&at>now)items.push({alarm,at});continue}for(let offset=0;offset<7;offset++){const at=new Date(now);at.setDate(now.getDate()+offset);at.setHours(alarm.h,alarm.m,0,0);if(at>now&&alarm.days.includes(at.getDay()||7))items.push({alarm,at})}}return items.sort((a,b)=>a.at-b.at).slice(0,62).map(({alarm,at})=>({id:notificationId('alarm',alarm,at),title:'My Winter Arc · '+alarm.label,body:alarm.msg||DET[alarm.id]||'Your scheduled alarm is ready. Tap to open alarm controls.',schedule:{at},sound:'winter_arc_alarm.wav',extra:{kind:'winter-arc-alarm',alarm:{...alarm},scheduledAt:at.toISOString()}}))}
 async function syncNativeAlarms(force=false){if(!nativePlatform())return;if(nativeSchedulePromise)return nativeSchedulePromise;if(!force&&Date.now()-lastNativeSchedule<60000)return;nativeSchedulePromise=(async()=>{const ln=localNotifications();if(!ln){nativeAlarmReady=false;setNativeAlarmStatus('Native notifications are unavailable. Rebuild the app after installing its dependencies.');return}const permission=await ln.checkPermissions();if(permission.display!=='granted'){nativeAlarmReady=false;setNativeAlarmStatus('Allow notifications so alarms can ring while the app is closed.');return}const pending=await ln.getPending(),old=pending.notifications.filter(n=>n.extra&&n.extra.kind==='winter-arc-alarm'),wanted=upcomingAlarmNotifications(),ids=new Set(wanted.map(n=>n.id)),obsolete=old.filter(n=>!ids.has(n.id)),existing=new Set(old.map(n=>n.id));if(obsolete.length)await ln.cancel({notifications:obsolete.map(n=>({id:n.id}))});const missing=wanted.filter(n=>!existing.has(n.id));if(missing.length)await ln.schedule({notifications:missing});nativeAlarmReady=true;lastNativeSchedule=Date.now();let exact=true;if(window.WinterArcNative.Capacitor.getPlatform()==='android'){const settings=await ln.checkExactNotificationSetting();exact=settings.exact_alarm==='granted'}setNativeAlarmStatus(exact?`Alarm notifications scheduled (${wanted.length} upcoming). Keep notifications enabled.`:'Notifications are on, but Android exact-alarm access is off; alarms may be delayed.');})().catch(e=>{nativeAlarmReady=false;console.error('Could not schedule native Winter Arc alarms:',e);setNativeAlarmStatus('Could not schedule alarms: '+e.message)}).finally(()=>{nativeSchedulePromise=null});return nativeSchedulePromise}
 async function enableNativeAlarms(){const ln=localNotifications();if(!nativePlatform()||!ln)return;try{let permission=await ln.checkPermissions();if(permission.display!=='granted')permission=await ln.requestPermissions();if(permission.display!=='granted'){setNativeAlarmStatus('Notification permission was not granted. Enable it in device settings to use background alarms.');return}if(window.WinterArcNative.Capacitor.getPlatform()==='android'){let setting=await ln.checkExactNotificationSetting();if(setting.exact_alarm!=='granted'){setNativeAlarmStatus('Enable “Alarms & reminders” in system settings, then return here.');setting=await ln.changeExactNotificationSetting();if(setting.exact_alarm!=='granted'){await syncNativeAlarms(true);return}}}await syncNativeAlarms(true)}catch(e){console.error('Could not enable alarm permissions:',e);setNativeAlarmStatus('Could not enable alarms: '+e.message)}}
-function handleNativeAlarm(notification){const extra=notification&&notification.extra;if(!extra||!extra.alarm||!['winter-arc-alarm','winter-arc-snooze'].includes(extra.kind)||handledAlarmNotifications.has(notification.id))return;handledAlarmNotifications.add(notification.id);currentNotificationId=notification.id;const saved=S.items.find(i=>i.id==extra.alarm.id);if(extra.kind==='winter-arc-alarm'&&saved&&saved.days.length===0){saved.on=false;persist();drawA()}ring(extra.alarm);syncNativeAlarms(true)}
-async function setupNativeAlarms(){if(!nativePlatform())return;const ln=localNotifications();if(!ln){setNativeAlarmStatus('Native notifications are unavailable. Rebuild the app after installing its dependencies.');return}try{await ln.addListener('localNotificationReceived',handleNativeAlarm);await ln.addListener('localNotificationActionPerformed',event=>handleNativeAlarm(event.notification));await syncNativeAlarms(true);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){syncNativeAlarms(true);ln.getDeliveredNotifications().then(result=>{const latest=result.notifications.filter(n=>n.extra&&n.extra.kind==='winter-arc-alarm').sort((a,b)=>String(b.extra.scheduledAt||'').localeCompare(String(a.extra.scheduledAt||'')))[0];if(latest)handleNativeAlarm(latest)}).catch(e=>{console.error('Could not check delivered alarms:',e);setNativeAlarmStatus('Could not check recent alarm notifications: '+e.message)})}})}catch(e){console.error('Could not initialize native alarms:',e);setNativeAlarmStatus('Could not initialize alarm notifications: '+e.message)}}
+function readCountdown(){try{const raw=localStorage.getItem('wa2-countdown');if(!raw)return null;const saved=JSON.parse(raw);return Number.isSafeInteger(saved.dueAt)&&saved.dueAt>Date.now()-86400000&&Number.isInteger(saved.notificationId)?saved:null}catch(e){console.error('Could not read the saved countdown:',e);return null}}
+let countdown=readCountdown(),countdownTicker=null;
+function countdownText(ms){const total=Math.max(0,Math.ceil(ms/1000)),hours=Math.floor(total/3600),minutes=Math.floor(total%3600/60),seconds=total%60;return hours?`${p2(hours)}:${p2(minutes)}:${p2(seconds)}`:`${p2(minutes)}:${p2(seconds)}`}
+function showCountdownStatus(message){$('timerStatus').textContent=message}
+function renderCountdown(){const active=!!countdown;$('timerStart').disabled=active;$('timerCancel').hidden=!active;$('timerMinutes').disabled=active;$('timerSeconds').disabled=active;if(active){const left=countdown.dueAt-Date.now();if(left<=0){finishCountdown();return}showCountdownStatus(`Timer running · ${countdownText(left)}${nativePlatform()?'':' · keep this page open for the alarm'}`)}}
+function clearSavedCountdown(){try{localStorage.removeItem('wa2-countdown')}catch(e){console.error('Could not clear the saved countdown:',e);showCountdownStatus('Could not save timer state on this device: '+e.message)}}
+function finishCountdown(){
+ if(!countdown)return;
+ const finished=countdown;countdown=null;clearSavedCountdown();renderCountdown();
+ showCountdownStatus('Time is up.');
+ if(finished.notificationId){completedTimerNotifications.add(finished.notificationId);if(nativePlatform()&&localNotifications())localNotifications().cancel({notifications:[{id:finished.notificationId}]}).catch(e=>console.error('Could not clear completed countdown notification:',e))}
+ ring({id:-2,label:'Countdown timer',msg:'Your custom countdown is complete.'});
+}
+const completedTimerNotifications=new Set();
+async function startCountdown(){
+ if(countdown)return;
+ const minutes=Number($('timerMinutes').value),seconds=Number($('timerSeconds').value);
+ if(!Number.isInteger(minutes)||minutes<0||minutes>1439||!Number.isInteger(seconds)||seconds<0||seconds>59||(minutes===0&&seconds===0)){showCountdownStatus('Choose a duration from 1 second to 24 hours.');return}
+ const duration=minutes*60+seconds,dueAt=Date.now()+duration*1000,notificationIdValue=notificationId('timer',{id:-2,label:'Countdown timer'},new Date(dueAt));
+ countdown={dueAt,notificationId:notificationIdValue};
+ try{localStorage.setItem('wa2-countdown',JSON.stringify(countdown))}catch(e){console.error('Could not save the countdown:',e);countdown=null;showCountdownStatus('Could not save timer state: '+e.message);return}
+ renderCountdown();
+ if(nativePlatform()){
+   const ln=localNotifications();
+   try{
+     const permission=await ln.checkPermissions();
+     if(permission.display==='granted'){
+       await ln.schedule({notifications:[{id:notificationIdValue,title:'Winter Arc · Timer finished',body:'Your custom countdown is complete. Tap to open the app.',schedule:{at:new Date(dueAt)},sound:'winter_arc_alarm.wav',extra:{kind:'winter-arc-timer',alarm:{id:-2,label:'Countdown timer',msg:'Your custom countdown is complete.'},scheduledAt:new Date(dueAt).toISOString()}}]});
+       showCountdownStatus(`Timer running · ${countdownText(dueAt-Date.now())} · background notification scheduled`);
+     }else showCountdownStatus('Timer running, but notifications are off. Enable alarm notifications if it must alert in the background.');
+   }catch(e){console.error('Could not schedule the countdown notification:',e);showCountdownStatus('Timer is running in the app, but background notification could not be scheduled: '+e.message)}
+ }else showCountdownStatus('Timer running. Keep this page open; browsers cannot guarantee an alarm after the page closes.');
+ if(!countdownTicker)countdownTicker=setInterval(renderCountdown,1000);
+}
+async function cancelCountdown(){
+ if(!countdown)return;
+ const id=countdown.notificationId;countdown=null;clearSavedCountdown();renderCountdown();showCountdownStatus('Timer cancelled.');
+ if(id&&nativePlatform()&&localNotifications())try{await localNotifications().cancel({notifications:[{id}]})}catch(e){console.error('Could not cancel countdown notification:',e);showCountdownStatus('Timer cancelled in the app, but its notification could not be cancelled: '+e.message)}
+}
+$('timerStart').onclick=()=>{if(!nativePlatform())prepareAlarmAudio();startCountdown()};$('timerCancel').onclick=cancelCountdown;
+document.querySelectorAll('[data-timer-preset]').forEach(button=>button.onclick=()=>{const total=+button.dataset.timerPreset;$('timerMinutes').value=Math.floor(total/60);$('timerSeconds').value=total%60});
+function handleNativeAlarm(notification){
+ const extra=notification&&notification.extra;
+ if(!extra||!extra.alarm||!['winter-arc-alarm','winter-arc-snooze','winter-arc-timer'].includes(extra.kind)||handledAlarmNotifications.has(notification.id)||completedTimerNotifications.has(notification.id))return;
+ handledAlarmNotifications.add(notification.id);currentNotificationId=notification.id;
+ if(extra.kind==='winter-arc-timer'){completedTimerNotifications.add(notification.id);if(countdown&&countdown.notificationId===notification.id)countdown=null;clearSavedCountdown();renderCountdown();showCountdownStatus('Time is up.')}
+ const saved=S.items.find(i=>i.id==extra.alarm.id);
+ if(extra.kind==='winter-arc-alarm'&&saved&&saved.days.length===0){saved.on=false;persist();drawA()}
+ ring(extra.alarm);syncNativeAlarms(true)
+}
+async function setupNativeAlarms(){if(!nativePlatform())return;const ln=localNotifications();if(!ln){setNativeAlarmStatus('Native notifications are unavailable. Rebuild the app after installing its dependencies.');return}try{await ln.addListener('localNotificationReceived',handleNativeAlarm);await ln.addListener('localNotificationActionPerformed',event=>handleNativeAlarm(event.notification));await syncNativeAlarms(true);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){syncNativeAlarms(true);ln.getDeliveredNotifications().then(result=>{const latest=result.notifications.filter(n=>n.extra&&['winter-arc-alarm','winter-arc-timer'].includes(n.extra.kind)).sort((a,b)=>String(b.extra.scheduledAt||'').localeCompare(String(a.extra.scheduledAt||'')))[0];if(latest)handleNativeAlarm(latest)}).catch(e=>{console.error('Could not check delivered alarms:',e);setNativeAlarmStatus('Could not check recent alarm notifications: '+e.message)})}})}catch(e){console.error('Could not initialize native alarms:',e);setNativeAlarmStatus('Could not initialize alarm notifications: '+e.message)}}
 function edit(i){editing=i||{id:Date.now()%1e7+100,label:'',h:6,m:0,days:[],on:true,topic:2,msg:'',_n:1};$('el').value=editing.label;$('et').value=p2(editing.h)+':'+p2(editing.m);$('etopic').innerHTML=ATOP.map((t,n)=>`<option value="${n}">${t[0]} ${t[1]}</option>`).join('');$('etopic').value=String(editing.topic??defaultAlarmTopic(editing.id));$('emsg').value=editing.msg||'';$('ef').value='';$('eti').textContent=editing._n?'New alarm':'Edit alarm';$('esn').textContent=sounds[editing.id]?'Custom sound selected':'Default sound';$('edel').style.display=editing._n?'none':'';$('ec').innerHTML=ORD.map(d=>`<label><input type="checkbox" value="${d}" ${editing.days.includes(d)?'checked':''}>${DN[d]}</label>`).join('');$('ed').classList.add('s')}
 $('add').onclick=()=>edit();$('ecan').onclick=()=>$('ed').classList.remove('s');
 $('edel').onclick=()=>{S.items=S.items.filter(x=>x.id!=editing.id);persist();drawA();$('ed').classList.remove('s');syncNativeAlarms(true)};
 $('esv').onclick=()=>{const[a,b]=$('et').value.split(':').map(Number);editing.label=$('el').value.trim()||'Alarm';editing.h=a;editing.m=b;editing.topic=+$('etopic').value;editing.msg=$('emsg').value.trim();editing.days=[...$('ec').querySelectorAll('input:checked')].map(x=>+x.value);if(editing.days.length){delete editing.onceAt}else{const at=new Date();at.setHours(a,b,0,0);if(at<=new Date())at.setDate(at.getDate()+1);editing.onceAt=at.toISOString()}const f=$('ef').files[0];if(f)sounds[editing.id]=URL.createObjectURL(f);if(editing._n){delete editing._n;S.items.push(editing)}expandedAlarmId=editing.id;persist();drawA();$('ed').classList.remove('s');syncNativeAlarms(true)};
-let ac,bt,cur,snd,fired={};function beep(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=880;g.gain.value=.3;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.3)}catch(e){}}
+let ac,bt,cur,snd,fired={};function prepareAlarmAudio(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext);if(ac.state==='suspended')ac.resume().catch(e=>console.error('Could not enable alarm audio:',e))}catch(e){console.error('Could not prepare alarm audio:',e)}}document.addEventListener('pointerdown',prepareAlarmAudio,{once:true});document.addEventListener('keydown',prepareAlarmAudio,{once:true});function beep(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=880;g.gain.value=.3;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.3)}catch(e){console.error('Could not play alarm sound:',e);if(cur&&cur.id===-2)showCountdownStatus('Time is up, but browser audio could not start. Enable sound and keep this page open.')}}
 let rctx={};
-function ring(i){if(bt)clearInterval(bt);if(snd){snd.pause();snd=null}cur=i;const td=sched(),n=new Date(),mi=n.getHours()*60+n.getMinutes(),ix=td.findIndex(x=>x.id==i.id);rctx=ix>=0?{p:td[ix-1],n:td[ix+1]}:{p:[...td].reverse().find(x=>x.h*60+x.m<=mi),n:td.find(x=>x.h*60+x.m>mi)};
+function ring(i){if(bt)clearInterval(bt);if(snd){snd.pause();snd=null}cur=i;const td=sched(),n=new Date(),mi=n.getHours()*60+n.getMinutes(),ix=td.findIndex(x=>x.id==i.id);rctx=i.id===-2?{}:ix>=0?{p:td[ix-1],n:td[ix+1]}:{p:[...td].reverse().find(x=>x.h*60+x.m<=mi),n:td.find(x=>x.h*60+x.m>mi)};
 rctx.m=mi;rctx.now=fmt({h:n.getHours(),m:n.getMinutes()});$('rt').textContent=i.label;$('rd').textContent=i.msg||DET[i.id]||'';$('rtm').textContent=fmt({h:n.getHours(),m:n.getMinutes()});$('rq').textContent=MSG[Math.floor(Math.random()*MSG.length)];pv();$('ring').classList.add('s');if(navigator.vibrate)navigator.vibrate([400,200,400]);if(sounds[i.id]){snd=new Audio(sounds[i.id]);snd.loop=true;snd.play().catch(()=>{})}else{beep();bt=setInterval(beep,700)}}
 function pv(){const p=rctx.p,n=rctx.n,b=S.blk[dayNo()]||{};let ev='';if(n){const x=n.h*60+n.m-rctx.m;ev=x>=60?Math.floor(x/60)+' h '+x%60+' min':x+' min'}
-$('pv').innerHTML=p?`<div class="k">Time's up · ${fmt(p)} → ${rctx.now}</div><div class="t2">${p.label}</div>${b[p.id]?'<div class="chk"><span class="bx2"></span><b>Completed ✓</b></div>':`<div class="d2">Did you finish it?</div><div class="yn"><button class="y" data-bd="${p.id}">✓ Yes, done</button><button data-no="1">Not yet</button></div>`}`:'';
-$('nxb').innerHTML=n?`<div class="k">After this · ${fmt(n)} · in ${ev}</div><div class="t2">${n.label}</div><div class="d2">${DET[n.id]||''}</div>`:''}
+$('pv').innerHTML=p?`<div class="k">Time's up · ${fmt(p)} → ${rctx.now}</div><div class="t2">${escapeHTML(p.label)}</div>${b[p.id]?'<div class="chk"><span class="bx2"></span><b>Completed ✓</b></div>':`<div class="d2">Did you finish it?</div><div class="yn"><button class="y" data-bd="${p.id}">✓ Yes, done</button><button data-no="1">Not yet</button></div>`}`:'';
+$('nxb').innerHTML=n?`<div class="k">After this · ${fmt(n)} · in ${ev}</div><div class="t2">${escapeHTML(n.label)}</div><div class="d2">${escapeHTML(DET[n.id]||'')}</div>`:''}
 function stop(){ $('ring').classList.remove('s');clearInterval(bt);if(snd){snd.pause();snd=null}if(currentNotificationId&&localNotifications())localNotifications().removeDeliveredNotifications({notifications:[{id:currentNotificationId}]}).catch(e=>console.error('Could not dismiss alarm notification:',e));currentNotificationId=null}
 async function snooze(){const i=cur;stop();if(nativeAlarmReady){try{const at=new Date(Date.now()+300000);await localNotifications().schedule({notifications:[{id:notificationId('snooze',i,at),title:'My Winter Arc · '+i.label,body:'Your 5-minute snooze is over. Tap to open alarm controls.',schedule:{at},extra:{kind:'winter-arc-snooze',alarm:{...i},scheduledAt:at.toISOString()}}]});return}catch(e){console.error('Could not schedule alarm snooze:',e);setNativeAlarmStatus('Snooze could not be scheduled: '+e.message)}}setTimeout(()=>ring(i),3e5)}
-$('stp').onclick=stop;$('snz').onclick=snooze;$('test').onclick=()=>{beep();setTimeout(()=>ring({id:-1,label:'Test alarm'}),5000)};
+$('stp').onclick=stop;$('snz').onclick=snooze;$('cnt').onclick=()=>{stop();document.querySelector('nav button[data-p="0"]').click()};$('test').onclick=()=>{prepareAlarmAudio();beep();setTimeout(()=>ring({id:-1,label:'Test alarm'}),5000)};
 setInterval(()=>{if(nativeAlarmReady)return;const n=new Date(),k=n.getFullYear()+'-'+n.getMonth()+'-'+n.getDate()+'-'+n.getHours()+'-'+n.getMinutes();S.items.forEach(i=>{const once=i.on&&!i.days.length&&i.onceAt&&Date.now()>=new Date(i.onceAt).getTime(),repeat=i.on&&i.days.includes(n.getDay()||7)&&i.h==n.getHours()&&i.m==n.getMinutes();if((once||repeat)&&fired[i.id]!=k){fired[i.id]=k;if(once){i.on=false;persist();drawA()}ring(i)}})},1000);
 document.addEventListener('click',e=>{if(e.target.closest('[data-alarm-permission]'))enableNativeAlarms()});
 // ---------- arc ----------
 const D0=()=>{const n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate())};
 const dayNo=()=>S.start?Math.round((D0()-new Date(S.start))/864e5)+1:0;
 const done=d=>(S.log[d]||[]).length>=9, col=i=>i<=30?'var(--red)':i<=60?'var(--grn)':'var(--grn)';
-const ta=(k,ph)=>`<textarea data-k="${k}" placeholder="${ph}">${getp(k)||''}</textarea>`,inp=(k,ph,t='text')=>`<input type="${t}" data-k="${k}" placeholder="${ph}" value="${getp(k)||''}">`;
+const ta=(k,ph)=>`<textarea data-k="${escapeHTML(k)}" placeholder="${escapeHTML(ph)}">${escapeHTML(getp(k)||'')}</textarea>`,inp=(k,ph,t='text')=>`<input type="${t==='number'?'number':'text'}" data-k="${escapeHTML(k)}" placeholder="${escapeHTML(ph)}" value="${escapeHTML(getp(k)||'')}">`;
 const rate=(k,lbl)=>`<div class="r5"><span>${lbl}</span>${[1,2,3,4,5].map(n=>`<button data-k="${k}" data-v="${n}" class="${getp(k)==n?'on':''}">${n}</button>`).join('')}</div>`;
 function drawArc(){const no=dayNo(),sel=S.sel||Math.min(Math.max(no,1),90);let h=`<h1>${no?'Day '+Math.min(no,90)+' / 90':'The 90-Day Arc'}</h1><div class="sub">Quiet winter. Loud results.</div>`;
 if(!no)h+='<button class="btn" data-start="1">Start Day 1 today</button>';
@@ -272,13 +422,104 @@ h+=rate('score.'+sel,'Day score (1–5)')+'</div>';
 h+=`<div class="card"><b>${m[0]}</b><div class="d">Syllabus covered: ${b*5}% (each box = 5%)</div><div class="bx">${Array.from({length:20},(_,k)=>`<div data-b="${n}.${k+1}" class="${k<b?'on':''}"></div>`).join('')}</div><div class="g2">${inp('mo.'+n+'.w0','Start kg','number')}${inp('mo.'+n+'.w1','End kg','number')}</div>${inp('mo.'+n+'.ch','Chapters finished')}${inp('mo.'+n+'.win','Best win 🏆')}${inp('mo.'+n+'.leak','Biggest leak')}${ta('mo.'+n+'.next',m[1])}</div>`});
 $('p2').innerHTML=h}
 // ---------- weeks ----------
-function drawW(){let h='<h1>📝 Weekly Introspection</h1><div class="sub">Every Friday night, 10 quiet minutes. Be honest, not harsh. 1 = weak, 5 = great.</div>';
+let weeksEditing=false,weeksStoredOriginal=null;
+function sanitizeWeeksHTML(html){
+ const parsed=new DOMParser().parseFromString(`<div>${html}</div>`,'text/html'),root=parsed.body.firstElementChild;
+ const allowed=new Set(['B','BR','DIV','DETAILS','H1','H2','H3','I','INPUT','LABEL','LI','OL','P','SMALL','SPAN','STRONG','SUMMARY','TABLE','TBODY','TD','TH','THEAD','TR','UL','TEXTAREA','BUTTON']);
+ const weeklyKey=/^wk\.(?:[1-9]|1[0-2])\.(?:st|bd|sl|fc|syl|kg|miss|mock|weak|err|win|leak|fix|tg)$/;
+ [...root.querySelectorAll('*')].reverse().forEach(el=>{
+   if(!allowed.has(el.tagName)){
+     if(['SCRIPT','STYLE','IFRAME','OBJECT','SVG','MATH'].includes(el.tagName))el.remove();
+     else el.replaceWith(...el.childNodes);
+     return;
+   }
+   [...el.attributes].forEach(attr=>{
+     if(attr.name==='class'&&/^[\w\s-]*$/.test(attr.value))return;
+     if(attr.name==='data-k'&&weeklyKey.test(attr.value))return;
+     if(el.tagName==='BUTTON'&&attr.name==='data-v'&&/^[1-5]$/.test(attr.value))return;
+     if(['INPUT','TEXTAREA'].includes(el.tagName)&&attr.name==='placeholder')return;
+     if(el.tagName==='INPUT'&&attr.name==='type'&&['text','number'].includes(attr.value))return;
+     if(el.tagName==='INPUT'&&attr.name==='value')return;
+     el.removeAttribute(attr.name);
+   });
+   if(el.tagName==='INPUT'&&(!['text','number'].includes(el.getAttribute('type'))||!weeklyKey.test(el.getAttribute('data-k')||'')))el.remove();
+   if(el.tagName==='TEXTAREA'&&!weeklyKey.test(el.getAttribute('data-k')||''))el.remove();
+   if(el.tagName==='BUTTON'&&(!weeklyKey.test(el.getAttribute('data-k')||'')||!el.hasAttribute('data-v')))el.replaceWith(...el.childNodes);
+ });
+ return root.innerHTML;
+}
+function saveWeeksEditorHTML(){
+ const root=$('weeksContent');
+ root.querySelectorAll('[data-k]').forEach(el=>{
+   if(el.tagName==='INPUT')el.setAttribute('value',el.value);
+   else if(el.tagName==='TEXTAREA')el.textContent=el.value;
+ });
+ root.querySelectorAll('button[data-k][data-v]').forEach(button=>button.classList.toggle('on',getp(button.dataset.k)==button.dataset.v));
+ S.weeksHtml=sanitizeWeeksHTML(root.innerHTML);
+}
+document.addEventListener('paste',e=>{
+ const root=e.target.closest&&e.target.closest('#planContent[contenteditable="true"], #weeksContent[contenteditable="true"]');
+ if(!root)return;
+ e.preventDefault();
+ const text=e.clipboardData&&e.clipboardData.getData('text/plain');
+ if(typeof text!=='string')return;
+ const selection=getSelection();
+ if(!selection||!selection.rangeCount)return;
+ const range=selection.getRangeAt(0);range.deleteContents();
+ const node=document.createTextNode(text);range.insertNode(node);range.setStartAfter(node);range.collapse(true);
+ selection.removeAllRanges();selection.addRange(range);
+ root.dispatchEvent(new InputEvent('input',{bubbles:true,inputType:'insertText',data:text}));
+});
+function hydrateWeeksEditor(){
+ $('weeksContent').querySelectorAll('[data-k]').forEach(el=>{
+   if(el.tagName==='INPUT')el.value=getp(el.dataset.k)??'';
+   else if(el.tagName==='TEXTAREA')el.value=getp(el.dataset.k)??'';
+   else if(el.tagName==='BUTTON'&&el.dataset.v)el.classList.toggle('on',getp(el.dataset.k)==el.dataset.v);
+ });
+}
+function drawW(){const hasCustomWeeks=typeof S.weeksHtml==='string';if(hasCustomWeeks)S.weeksHtml=sanitizeWeeksHTML(S.weeksHtml);let h=hasCustomWeeks?S.weeksHtml:'<h1>📝 Weekly Introspection</h1><div class="sub">Every Friday night, 10 quiet minutes. Be honest, not harsh. 1 = weak, 5 = great.</div>';
+if(!hasCustomWeeks){
 for(let w=1;w<=12;w++){const k='wk.'+w+'.';h+=`<details><summary><span>Week</span> ${p2(w)}<span class="d">${getp(k+'mock')?' · mock '+getp(k+'mock'):''}</span></summary>${rate(k+'st','Study')}${rate(k+'bd','Body · Gym + food')}${rate(k+'sl','Sleep')}${rate(k+'fc','Focus')}<div class="g2">${inp(k+'syl','Syllabus %')}${inp(k+'kg','Avg weight kg','number')}${inp(k+'miss','Miss days','number')}${inp(k+'mock','Mock test marks')}</div>${inp(k+'weak','Weakest 3 topics')}${inp(k+'err','Main error: Concept / Formula / Careless')}${inp(k+'win','Win this week')}${inp(k+'leak','Biggest leak (where did time go?)')}${inp(k+'fix','Next week: 1 fix')}${ta(k+'tg','Next week 5 targets')}</details>`}
-$('p3').innerHTML=h}
+}
+$('p3').innerHTML=`<div class="weeks-tools"><button type="button" class="btn" data-weeks-edit>${weeksEditing?'Save weeks':'Edit weeks'}</button>${weeksEditing?'<button type="button" class="btn g" data-weeks-cancel>Cancel</button>':''}</div><div id="weeksContent" ${weeksEditing?'contenteditable="true" spellcheck="true"':''}>${h}</div>`;
+hydrateWeeksEditor();
+}
+document.addEventListener('input',e=>{if(!weeksEditing||!e.target.closest('#weeksContent'))return;saveWeeksEditorHTML();persist()});
+document.addEventListener('click',e=>{
+ if(e.target.closest('[data-weeks-edit]')){
+   if(weeksEditing){saveWeeksEditorHTML();weeksEditing=false;weeksStoredOriginal=null;persist();drawW()}
+   else{weeksStoredOriginal=S.weeksHtml;weeksEditing=true;drawW()}
+ }else if(e.target.closest('[data-weeks-cancel]')){
+   S.weeksHtml=weeksStoredOriginal;weeksEditing=false;weeksStoredOriginal=null;persist();drawW()
+ }
+});
 // ---------- plan ----------
 const RM=[['Matrices & Determinants; Vectors','Physical world & measurement; Vectors; Dynamics','Lab safety; Qualitative chemistry','Paper 1 · part 1/6','ICT ch1 · Bangla grammar 1 · Tense + Right form','Routine set; Mistake Notebook starts'],['Straight line; Circle','Newtonian mechanics; Work-Energy-Power','Periodic properties; Chemical bonding','Paper 1 · part 2/6','ICT ch2 · Grammar 2 · English grammar 2','First weekly test'],['Permutation & Combination; Trig ratios','Gravitation; Structural properties of matter','Chemical change (important)','Paper 1 · part 3/6','ICT ch3 start · Grammar 3 · English grammar 3','—'],['Associated angles; Functions & graphs','Periodic motion; Waves; Ideal gas','Vocational chemistry','Paper 1 · part 4/6','ICT ch3 end · Bangla · English reading (seen)','Month-1 test + review (≈30%)'],['Differentiation','Thermodynamics; Static electricity','Environmental chemistry','Paper 1 · part 5/6','ICT ch4 (HTML) · Bangla · Reading (unseen)','—'],['Integration','Current electricity; Magnetic effect','Organic chemistry (part 1)','Paper 1 · part 6/6','ICT ch4 (HTML) · Poetry · Vocabulary','Mid-check (≈50%)'],['Real numbers & inequalities; Complex numbers','EM induction & AC; Geometrical optics','Organic chemistry (part 2)','Paper 2 · part 1/5','ICT ch5 (Programming) · Poetry/Drama · Writing 1','—'],['Polynomials; Binomial expansion','Physical optics; Intro to modern physics','Quantitative chemistry','Paper 2 · part 2/5','ICT ch5 · Novel · Writing 2','Month-2 test (≈65%)'],['Conics','Atomic model & nuclear physics; Semiconductors','Electrochemistry','Paper 2 · part 3/5','ICT ch5 end · Composition · Writing 3','—'],['Inverse trig functions; Statics','Astronomy; Numerical + CQ practice','Economic chemistry; Numerical','Paper 2 · part 4/5','ICT ch6 (DBMS) · Practice · English mock','≈85–90% done'],['Dynamics; Dispersion & Probability','All-chapter CQ/MCQ + weak topics','All-chapter CQ/MCQ + weak topics','Paper 2 · part 5/5','ICT revision · Bangla test · English test','First pass 100% done'],['Full revision + model test','Full revision + model test','Full revision + model test','Full revision + model test','ICT / Bangla / English model test','Full model tests + weak-topic fix']];
 const L=a=>'<ul>'+a.map(x=>`<li>${x}</li>`).join('')+'</ul>',T=(hd,rows)=>`<div class="tw"><table><tr>${hd.map(x=>`<th>${x}</th>`).join('')}</tr>${rows.map(r=>`<tr>${r.map(x=>`<td>${x}</td>`).join('')}</tr>`).join('')}</table></div>`;
-function drawP(){$('p4').innerHTML=`<h1>📚 Master Plan</h1><div class="sub">HSC 2027 · 3 months full syllabus (Pareto 80/20) · 55→60 kg · Salah + Sleep + Consistency</div>
+let planEditing=false,planStoredOriginal=null;
+function sanitizePlanHTML(html){
+ const parsed=new DOMParser().parseFromString(`<div>${html}</div>`,'text/html'),root=parsed.body.firstElementChild;
+ const allowed=new Set(['B','BR','DIV','DETAILS','H1','H2','H3','I','INPUT','LABEL','LI','OL','P','SMALL','SPAN','STRONG','SUMMARY','TABLE','TBODY','TD','TH','THEAD','TR','UL']);
+ [...root.querySelectorAll('*')].reverse().forEach(el=>{
+   if(!allowed.has(el.tagName)){
+     if(['SCRIPT','STYLE','IFRAME','OBJECT','SVG','MATH'].includes(el.tagName))el.remove();
+     else el.replaceWith(...el.childNodes);
+     return;
+   }
+   [...el.attributes].forEach(attr=>{
+     if(attr.name==='class'&&/^[\w\s-]*$/.test(attr.value))return;
+     if(attr.name==='style'&&attr.value.trim()==='align-items: flex-start;')return;
+     if(el.tagName==='DETAILS'&&attr.name==='open')return;
+     if(el.tagName==='INPUT'&&attr.name==='type'&&attr.value==='checkbox')return;
+     if(el.tagName==='INPUT'&&attr.name==='checked')return;
+     if(el.tagName==='INPUT'&&attr.name==='data-road'&&/^(?:[1-9]|1[0-2])$/.test(attr.value))return;
+     el.removeAttribute(attr.name);
+   });
+   if(el.tagName==='INPUT'&&(el.getAttribute('type')!=='checkbox'||!el.hasAttribute('data-road')))el.remove();
+ });
+ return root.innerHTML;
+}
+function drawP(){const defaultPlan=`<h1>📚 Master Plan</h1><div class="sub">HSC 2027 · 3 months full syllabus (Pareto 80/20) · 55→60 kg · Salah + Sleep + Consistency</div>
 <details open><summary>Daily budget & 6 non-negotiables</summary>${T(['Task','Time'],[['Tuition','1.5h'],['Online class','4h (2+2)'],['Self-study','≈6h: 90+90+70+105 min'],['Gym + travel','1h 50m (Fri OFF)'],['Sleep','7.5h (10:00 PM–5:30 AM)'],['Salah','5 waqt, adjust to local Azan']])}${L(['Study — 4 self-study blocks daily','Tuition + Online class — same-day MCQ/CQ of that chapter','Gym — correct form, then progressive overload','Food — calorie surplus + enough protein','Sleep — 7.5h','Salah — 5 waqt'])}<b>Minimum Day:</b> Math + Biology blocks · Tuition + Online class · Gym (or 20 min walk) · 5 Salah · 7h sleep. These 5 keep the streak alive.</details>
 <details><summary>Weekly rotation (self-study)</summary>${T(['Day','SS1 90m','SS2 90m','SS3 70m','SS4 105m'],[['Sat','Higher Math','Biology','Physics','Chemistry'],['Sun','Higher Math','Biology','Chemistry','Physics'],['Mon','Higher Math','Biology','Physics','ICT'],['Tue','Higher Math','Biology','Chemistry','English'],['Wed','Higher Math','Biology','Physics','Bangla'],['Thu','Higher Math','Biology','Chemistry','Weak topic + revision'],['Fri','Mock test 5:30–6:50, mistake analysis, next-week plan (Gym OFF)','','','']])}</details>
 <details><summary>12-week roadmap (tick when done)</summary><div class="note">Chapter names are my reading of your PDF — match them to your textbook order.</div>${RM.map((r,i)=>`<label class="h" style="align-items:flex-start"><input type="checkbox" data-road="${i+1}" ${S.road[i+1]?'checked':''}><div><b>Week ${i+1}</b><div class="d">Math: ${r[0]}<br>Physics: ${r[1]}<br>Chemistry: ${r[2]}<br>Biology: ${r[3]}<br>${r[4]}<br>🎯 ${r[5]}</div></div></label>`).join('')}</details>
@@ -286,7 +527,20 @@ function drawP(){$('p4').innerHTML=`<h1>📚 Master Plan</h1><div class="sub">HS
 <details><summary>Subject rules</summary>${T(['Subject','Hours/wk','How'],[['Higher Math','9h','Formula + solved example + daily problems; 5 of each type'],['Biology','9h','Concept + diagram + keywords + written recall'],['Physics','5.25h','Concept + formula meaning + derivation + numerical + CQ/MCQ'],['Chemistry','5.25h','Concept + reactions + equation practice + CQ/MCQ'],['ICT / English / Bangla','1.75h each','Concept + MCQ + writing; ICT programming/HTML hands-on'],['Weak topic / revision','1.75h','Fix weak spots = most marks']])}</details>
 <details><summary>Food plan (≈2800–3000 kcal, protein 100–120g)</summary>${T(['Meal','Time','What'],[['Breakfast','7:20','Rice 250–300g + 2 eggs + dal + veg'],['Snack','9:50','Oats 60g + banana + nuts 20g'],['Lunch','11:35','Rice 300–350g + fish/meat + dal + veg'],['Snack','2:40','Banana + nuts 20g'],['Dinner','7:20','Rice 300–350g + 2 eggs + fish/dal/veg'],['Night','9:45','Milk 250 ml']])}Extra monthly cost ≈ ৳4,446 (oats 1,260 · eggs 1,560 · nuts 276 · banana 600 · milk 750).${L(['Target 0.25–0.5 kg/week, muscle-focused','Weigh Sat/Mon/Wed morning, empty stomach; use weekly average','2–3 weeks no gain → +150–200 kcal/day','More than 0.6 kg/week → reduce a little','Never skip meals; keep banana/nuts/milk handy'])}</details>
 <details><summary>Gym</summary>${T(['Day','Workout'],[['Sat','Push — chest, shoulder, triceps'],['Sun','Pull — back, biceps'],['Mon','Legs + core'],['Tue','Push'],['Wed','Pull + core'],['Thu','Legs / light full body'],['Fri','OFF — recovery']])}${L(['Lift 45–75 min, compound first, 3–4 sets × 8–12, rest 60–90 s','Form first, then weight; log every session','5 min warm-up, light stretch','No ego lifting; stop at sharp pain'])}</details>
-<details><summary>Focus, tests & 99+ checklist</summary>${L(['Phone away / flight mode during study; social media max 30 min/day (use the Home timer)','Desk: only this block’s books + water','Lost focus? 2 deep breaths and restart. Skipped a day? Just restart, don’t double up'])}<b>Test ladder:</b> Chapter test → Subject test (every 2–3 wks) → Friday Weekly Mock → Full Model Test (last week, timed).${L(['Syllabus 100% covered','Textbook complete','CQ + MCQ repeated','Previous/model questions solved','Mistake Notebook revised','Timed writing practice','Careless mistakes ≈ 0','Weekly full test + analysis'])}<b>Final rule:</b> 80–90% consistently for 90 days beats 100% for 3 days.</details>`}
+<details><summary>Focus, tests & 99+ checklist</summary>${L(['Phone away / flight mode during study; social media max 30 min/day (use the Home timer)','Desk: only this block’s books + water','Lost focus? 2 deep breaths and restart. Skipped a day? Just restart, don’t double up'])}<b>Test ladder:</b> Chapter test → Subject test (every 2–3 wks) → Friday Weekly Mock → Full Model Test (last week, timed).${L(['Syllabus 100% covered','Textbook complete','CQ + MCQ repeated','Previous/model questions solved','Mistake Notebook revised','Timed writing practice','Careless mistakes ≈ 0','Weekly full test + analysis'])}<b>Final rule:</b> 80–90% consistently for 90 days beats 100% for 3 days.</details>`;
+ const content=typeof S.planHtml==='string'?S.planHtml:defaultPlan;
+ $('p4').innerHTML=`<div class="plan-tools"><button type="button" class="btn" data-plan-edit>${planEditing?'Save plan':'Edit plan'}</button>${planEditing?'<button type="button" class="btn g" data-plan-cancel>Cancel</button>':''}</div><div id="planContent" ${planEditing?'contenteditable="true" spellcheck="true"':''}>${content}</div>`;
+ document.querySelectorAll('#planContent input[data-road]').forEach(input=>{input.checked=!!S.road[input.dataset.road]});
+}
+document.addEventListener('input',e=>{if(!planEditing||!e.target.closest('#planContent'))return;S.planHtml=sanitizePlanHTML($('planContent').innerHTML);persist()});
+document.addEventListener('click',e=>{
+ if(e.target.closest('[data-plan-edit]')){
+   if(planEditing){S.planHtml=sanitizePlanHTML($('planContent').innerHTML);planEditing=false;planStoredOriginal=null;persist();drawP()}
+   else{planStoredOriginal=S.planHtml;planEditing=true;drawP()}
+ }else if(e.target.closest('[data-plan-cancel]')){
+   S.planHtml=planStoredOriginal;planEditing=false;planStoredOriginal=null;persist();drawP()
+ }
+});
 
 const MSG=["Day 1 is the hardest. You already chose to start — that puts you ahead of most.","Quiet winter. Loud results. Show up today, the rest follows.","Small boxes ticked daily beat big plans never done.","You are not behind. You are building. One block at a time.","Never miss twice. A bad day is just one dot, not a trend.","Future you is already proud that you opened this app today.","80–90% consistency for 90 days beats 100% for 3 days.","Discipline is choosing what you want most over what you want now."];
 const spark=(a,c,u)=>{if(a.length<2)return '<div class="d">Add at least 2 weekly entries to see the trend.</div>';const w=300,h=64,mn=Math.min(...a),mx=Math.max(...a),r=(mx-mn)||1,pts=a.map((v,i)=>[10+i*(w-20)/(a.length-1),h-10-(v-mn)/r*(h-20)]);return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}"><polyline fill="none" stroke="${c}" stroke-width="3" stroke-linejoin="round" points="${pts.map(p=>p.join(',')).join(' ')}"/>${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="${c}"/>`).join('')}</svg><div class="d">${a[0]}${u} → <b>${a[a.length-1]}${u}</b></div>`};
@@ -296,7 +550,7 @@ let hs='';if(S.hsc){const dl=Math.ceil((new Date(S.hsc)-D0())/864e5);hs=`<div cl
 let m=MSG[(no||0)%MSG.length];if(no>1&&!done(no-1)&&!done(no))m='Yesterday slipped — that is okay. Never miss twice: tick today.';if(s.streak>=3)m=`🔥 ${s.streak}-day streak. Do not break the chain — today is one more link.`;if(s.rate>=80&&s.last>=7)m=`You are keeping ${s.rate}% of your habits. That is exactly the 80–90% the plan asks for. Keep going.`;
 const b=S.blk[no]||{},bn=Object.keys(b).length,n0=new Date(),mi=n0.getHours()*60+n0.getMinutes(),td=sched(),cu=[...td].reverse().find(i=>i.h*60+i.m<=mi);
 const qs=[['Tick 9 habits',Math.min(tdy,9),9,50],['Confirm 3 blocks',Math.min(bn,3),3,15],["Log today's score",S.score[no]?1:0,1,10]];
-const rows=td.map(i=>{const t=i.h*60+i.m,dn=b[i.id],lt=!dn&&t<mi&&!(cu&&cu.id==i.id);return `<label class="bk ${dn?'dn':''} ${lt?'late':''} ${cu&&cu.id==i.id?'cur':''}"><input type="checkbox" data-bk="${i.id}" ${dn?'checked':''}><span class="tm">${fmt(i)}</span><span>${i.label}</span></label>`}).join('');
+const rows=td.map(i=>{const t=i.h*60+i.m,dn=b[i.id],lt=!dn&&t<mi&&!(cu&&cu.id==i.id);return `<label class="bk ${dn?'dn':''} ${lt?'late':''} ${cu&&cu.id==i.id?'cur':''}"><input type="checkbox" data-bk="${i.id}" ${dn?'checked':''}><span class="tm">${fmt(i)}</span><span>${escapeHTML(i.label)}</span></label>`}).join('');
 let dg='';for(let i=Math.max(1,s.last-13);i<=Math.max(s.last,1);i++){const n=(S.log[i]||[]).length,sc=n>=12?3:n>=9?2:n>=6?1:0;dg+=`<div class="dc"><span>${i}</span><b>${'★'.repeat(sc)||'·'}</b></div>`}
 const wp=s.w0?Math.max(0,Math.min(100,s.gain/(60-s.w0)*100)):0;
 $('p0').innerHTML=`${hdr()}${cover()}<div class="sub" style="text-align:center">Quiet winter. Loud results.</div>${no?'':'<button class="btn" data-start="1">Start Day 1 today</button>'}
@@ -305,7 +559,7 @@ ${nownext(cu,b)}<div id="smc"></div>
 <div class="card"><b>Today's schedule</b><div class="d">Tap the box when a block is finished</div>${rows}</div>
 <div class="card"><b>Daily Quests</b>${qs.map(q=>`<div class="q ${q[1]>=q[2]?'ok':''}"><span>${q[0]}</span><div class="xpb"><i style="width:${q[1]/q[2]*100}%"></i></div><b>${q[1]}/${q[2]}</b><em>+${q[3]} XP</em></div>`).join('')}</div>
 ${quick(no)}
-<div class="card ring"><svg width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="var(--line)" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="var(--red)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pc/100)}" transform="rotate(-90 60 60)"/><text x="60" y="66" text-anchor="middle" font-size="22" font-weight="800" fill="var(--ink)">${Math.round(pc)}%</text></svg><div><div class="big">${no?'Day '+Math.min(no,90):'Day 0'} <span class="d">/ 90</span></div><div><b>${left}</b> days left in this arc</div>${hs}<label class="d">HSC exam date: <input type="date" data-k="hsc" value="${S.hsc||''}" style="width:auto;padding:4px"></label></div></div>
+<div class="card ring"><svg width="120" height="120" viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" fill="none" stroke="var(--line)" stroke-width="10"/><circle cx="60" cy="60" r="52" fill="none" stroke="var(--red)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pc/100)}" transform="rotate(-90 60 60)"/><text x="60" y="66" text-anchor="middle" font-size="22" font-weight="800" fill="var(--ink)">${Math.round(pc)}%</text></svg><div><div class="big">${no?'Day '+Math.min(no,90):'Day 0'} <span class="d">/ 90</span></div><div><b>${left}</b> days left in this arc</div>${hs}<label class="d">HSC exam date: <input type="date" data-k="hsc" value="${escapeHTML(S.hsc||'')}" style="width:auto;padding:4px"></label></div></div>
 <div class="card msg">${m}</div>
 <div class="st"><div class="tilt"><b>🔥 ${s.streak}</b><span class="d">streak (best ${s.best})</span></div><div class="tilt"><b>⭐ ${s.stars}</b><span class="d">stars</span></div><div class="tilt"><b>✅ ${s.perfect}</b><span class="d">full days</span></div><div class="tilt"><b>${s.rate}%</b><span class="d">habit rate</span></div><div class="tilt"><b>📚 ${s.syl}%</b><span class="d">roadmap (${s.rd}/12 wks)</span></div><div class="tilt"><b>⚡ ${s.blk}</b><span class="d">blocks done</span></div></div>
 <h3>⚖️ <span>Body</span>: ${s.w0||'?'} → 60 kg</h3><div class="bar"><i style="width:${wp}%"></i></div><div class="d">${s.w0?`${s.gain>=0?'+':''}${s.gain.toFixed(1)} kg so far · ${Math.max(0,60-s.wn).toFixed(1)} kg to go`:'Enter start weight in Month 1 (Arc tab) and weekly average in Weeks tab.'}</div>${spark(s.kgs,'var(--grn)',' kg')}
@@ -332,9 +586,9 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.query
 // ---------- v3: design, language, onboarding ----------
 
 const lang=()=>`<div class="lang" role="group" aria-label="${S.lang=='bn'?'ভাষা':'Language'}"><button type="button" data-lang="en" aria-pressed="${S.lang!='bn'}" class="${S.lang!='bn'?'on':''}">EN</button><button type="button" data-lang="bn" aria-pressed="${S.lang=='bn'}" class="${S.lang=='bn'?'on':''}">বাং + EN</button></div>`;
-function hdr(){const h=new Date().getHours();return `<div class="hd"><div><div class="d">${h<12?'Good morning':h<17?'Good afternoon':'Good evening'}</div><h1>${S.name||'Warrior'}</h1></div><div class="hr2"><button class="gear" data-set="1" aria-label="${S.lang=='bn'?'সেটিংস':'Settings'}" title="${S.lang=='bn'?'সেটিংস':'Settings'}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.7 1.7-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.2h-2.4v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1L8 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6.7v-2.4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L8 8.6l1.7-1.7.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5v-.2h2.4v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.7 1.7-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.2V14h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div></div>`}
+function hdr(){const h=new Date().getHours();return `<div class="hd"><div><div class="d">${h<12?'Good morning':h<17?'Good afternoon':'Good evening'}</div><h1>${escapeHTML(S.name||'Warrior')}</h1></div><div class="hr2"><button class="gear" data-set="1" aria-label="${S.lang=='bn'?'সেটিংস':'Settings'}" title="${S.lang=='bn'?'সেটিংস':'Settings'}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.7 1.7-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.2h-2.4v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1L8 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6.7v-2.4h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9L8 8.6l1.7-1.7.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5v-.2h2.4v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.7 1.7-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.2V14h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div></div>`}
 function nownext(cu,b){const n=new Date(),mi=n.getHours()*60+n.getMinutes(),td=sched(),nx=td.find(i=>i.h*60+i.m>mi);const x=nx?nx.h*60+nx.m-mi:0,eta=x>=60?Math.floor(x/60)+' h '+x%60+' min':x+' min';
-return `<div class="card tilt"><div class="nl">Now</div><div class="nt">${cu?cu.label:'Nothing scheduled yet'}</div>${cu?`<div class="d">⏱ ${fmt(cu)}</div><div class="d">${DET[cu.id]||''}</div>${b[cu.id]?'<div class="d" style="color:var(--grn);font-weight:700">Done ✓</div>':`<button class="btn" data-bd="${cu.id}" style="margin-top:8px">Mark done</button>`}`:''}<div class="nl" style="margin-top:14px">Next</div><div class="nt">${nx?nx.label:'All done for today ✨'}</div>${nx?`<div class="d">⏱ ${fmt(nx)} · <span>${eta}</span></div><div class="d">${DET[nx.id]||''}</div>`:''}</div>`}
+return `<div class="card tilt"><div class="nl">Now</div><div class="nt">${cu?escapeHTML(cu.label):'Nothing scheduled yet'}</div>${cu?`<div class="d">⏱ ${fmt(cu)}</div><div class="d">${escapeHTML(DET[cu.id]||'')}</div>${b[cu.id]?'<div class="d" style="color:var(--grn);font-weight:700">Done ✓</div>':`<button class="btn" data-bd="${cu.id}" style="margin-top:8px">Mark done</button>`}`:''}<div class="nl" style="margin-top:14px">Next</div><div class="nt">${nx?escapeHTML(nx.label):'All done for today ✨'}</div>${nx?`<div class="d">⏱ ${fmt(nx)} · <span>${eta}</span></div><div class="d">${escapeHTML(DET[nx.id]||'')}</div>`:''}</div>`}
 function quick(no){const l=S.log[no]||[],st=l.length>=12?3:l.length>=9?2:l.length>=6?1:0;return `<div class="card tilt"><b>Today's Stars</b><div class="stars">${[1,2,3].map(i=>`<span class="star3 ${i<=st?'on':''}">⭐</span>`).join('')}</div><div class="d" style="text-align:center">6 habits = ★ · 9 = ★★ · 12 = ★★★</div>${no&&no<=90?HB.map((x,i)=>`<label class="h"><input type="checkbox" data-ht="${i}" ${l.includes(i)?'checked':''}>${x}</label>`).join(''):''}</div>`}
 function cover(){let sn='';for(let i=0;i<16;i++)sn+=`<i style="left:${Math.random()*100}%;animation-duration:${4+Math.random()*5}s;animation-delay:-${Math.random()*6}s"></i>`;
 const no=dayNo(),ph=S.cover?`style="background-image:linear-gradient(var(--scrim),var(--scrim-soft) 70%),url(${S.cover})"`:'';let t='',pn='';
@@ -349,11 +603,11 @@ return `<div class="ghw"><div class="gh" style="grid-template-columns:repeat(${c
 function confetti(){if(navigator.vibrate)navigator.vibrate(120);const c=['var(--on)','var(--gold)','var(--on)','var(--on)'];for(let i=0;i<42;i++){const e=document.createElement('i');e.className='cf';e.style.left=Math.random()*100+'vw';e.style.background=c[i%4];e.style.animationDelay=Math.random()*.5+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),3200)}}
 let obs=0;
 function ob(){const el=$('ob');if(S.ob){el.classList.remove('s');return}el.classList.add('s');const dots=`<div class="dots">${[1,2,3,4].map(i=>`<i class="${i==obs?'on':''}"></i>`).join('')}</div>`;
-const F=[`<div class="obh">${cover()}<h1>My Winter Arc</h1><div class="sub">My 90-Day Winter Challenge</div><div class="d">HSC 2027 · STUDY · BODY · MIND</div></div><button class="btn gg full" data-ob="1">Continue with Google</button><div class="or">or</div><input type="text" placeholder="Email"><input type="password" placeholder="Password"><button class="btn full" data-ob="1">Sign in</button><div class="note" style="text-align:center">Preview: the real Firebase login comes in the mobile app. Tap any button to continue.</div><div class="d" style="text-align:center;margin-top:14px">Written by <b>CodeWithSiam</b> · Md Siam Ahmmed</div>`,
-`${dots}<h2>What should I call you?</h2><input type="text" id="on" placeholder="Your name" value="${S.name||''}"><button class="btn full" data-ob="1">Continue</button>`,
-`${dots}<h2>Your starting weight</h2><input type="number" id="ow" placeholder="Weight in kg" value="${getp('mo.1.w0')||''}"><div class="d">Target is 60 kg</div><button class="btn full" data-ob="1">Continue</button>`,
-`${dots}<h2>When is your HSC exam?</h2><input type="date" id="oh" value="${S.hsc||''}"><div class="d">Optional — it powers your countdown.</div><button class="btn full" data-ob="1">Continue</button>`,
-`${dots}<h2>Why are you doing this?</h2><textarea id="oy" placeholder="Write your why…">${S.why||''}</textarea><h2>Your 1 rule</h2><textarea id="or1" placeholder="One rule…">${S.rule||''}</textarea><button class="btn full" data-ob="1">Begin Day 1 ❄️</button>`];$('obc').innerHTML=F[obs]}
+const F=[`<div class="obh">${cover()}<h1>My Winter Arc</h1><div class="sub">My 90-Day Winter Challenge</div><div class="d">HSC 2027 · STUDY · BODY · MIND</div></div><button class="btn gg full" data-google="onboarding" ${googleBusy?'disabled':''}>${googleBusy?'Connecting…':'Continue with Google'}</button>${googleMessage?`<div class="note" role="status">${escapeHtml(googleMessage)}</div>`:''}<div class="or">or</div><button class="btn full" data-ob="1">Continue without an account</button><div class="note" style="text-align:center">Sign in with Google to sync your progress across devices. You can also use the app without an account.</div><div class="d" style="text-align:center;margin-top:14px">Written by <b>CodeWithSiam</b> · Md Siam Ahmmed</div>`,
+`${dots}<h2>What should I call you?</h2><input type="text" id="on" placeholder="Your name" value="${escapeHTML(S.name||'')}"><button class="btn full" data-ob="1">Continue</button>`,
+`${dots}<h2>Your starting weight</h2><input type="number" id="ow" placeholder="Weight in kg" value="${escapeHTML(getp('mo.1.w0')||'')}"><div class="d">Target is 60 kg</div><button class="btn full" data-ob="1">Continue</button>`,
+`${dots}<h2>When is your HSC exam?</h2><input type="date" id="oh" value="${escapeHTML(S.hsc||'')}"><div class="d">Optional — it powers your countdown.</div><button class="btn full" data-ob="1">Continue</button>`,
+`${dots}<h2>Why are you doing this?</h2><textarea id="oy" placeholder="Write your why…">${escapeHTML(S.why||'')}</textarea><h2>Your 1 rule</h2><textarea id="or1" placeholder="One rule…">${escapeHTML(S.rule||'')}</textarea><button class="btn full" data-ob="1">Begin Day 1 ❄️</button>`];$('obc').innerHTML=F[obs]}
 const BN={'Home':'হোম','Alarms':'অ্যালার্ম','90-Day Arc':'৯০ দিনের Arc','Weeks':'সপ্তাহ','Plan':'প্ল্যান','Good morning':'শুভ সকাল','Good afternoon':'শুভ অপরাহ্ন','Good evening':'শুভ সন্ধ্যা','Warrior':'যোদ্ধা','Quiet winter. Loud results.':'শান্ত শীত। জোরালো ফল।','Start Day # today':'আজই Day # শুরু করো','Now':'এখন','Next':'এরপর','Nothing scheduled yet':'এখনো কিছু schedule নেই','All done for today ✨':'আজকের সব শেষ ✨',"Today's habits":'আজকের habit','# min':'# মিনিট','# h # min':'# ঘণ্টা # মিনিট','days left in this arc':'দিন বাকি এই Arc-এ','# days left':'# দিন বাকি','today or passed':'আজ বা পেরিয়ে গেছে','HSC exam date:':'HSC পরীক্ষার তারিখ:','HSC exam:':'HSC পরীক্ষা:','streak (best #)':'streak (সেরা #)','full days':'full দিন','habit rate':'habit rate','roadmap (#/# wks)':'roadmap (#/# সপ্তাহ)','weight now':'এখনকার ওজন','avg day score':'গড় day score','Body':'শরীর','+# kg so far · # kg to go':'এ পর্যন্ত +# kg · আর # kg বাকি','-# kg so far · # kg to go':'এ পর্যন্ত -# kg · আর # kg বাকি','Enter start weight in Month # (Arc tab) and weekly average in Weeks tab.':'Month #-এ (Arc tab) শুরুর ওজন আর Weeks tab-এ সাপ্তাহিক গড় ওজন লেখো।','Mock test marks':'Mock test-এর নম্বর','Last # days':'শেষ # দিন','Milestones':'Milestone','Add at least # weekly entries to see the trend.':'trend দেখতে অন্তত # সপ্তাহের তথ্য দাও।',
 'Day # is the hardest. You already chose to start — that puts you ahead of most.':'Day # সবচেয়ে কঠিন। তুমি শুরু করার সিদ্ধান্ত নিয়েছ — এটাই তোমাকে অনেকের চেয়ে এগিয়ে রাখে।','Quiet winter. Loud results. Show up today, the rest follows.':'শান্ত শীত। জোরালো ফল। আজ হাজির থাকো, বাকিটা আপনি আসবে।','Small boxes ticked daily beat big plans never done.':'প্রতিদিনের ছোট tick, না-করা বড় plan-এর চেয়ে অনেক শক্তিশালী।','You are not behind. You are building. One block at a time.':'তুমি পিছিয়ে নেই। তুমি গড়ছ। একটা block করে।','Never miss twice. A bad day is just one dot, not a trend.':'পরপর দুইদিন miss নয়। একটা খারাপ দিন শুধু একটা বিন্দু, trend নয়।','Future you is already proud that you opened this app today.':'ভবিষ্যৎ তুমি গর্বিত যে আজ তুমি এই app খুলেছ।','#–#% consistency for # days beats #% for # days.':'#–#% করে # দিন চালানো, #% করে # দিনের চেয়ে অনেক শক্তিশালী।','Discipline is choosing what you want most over what you want now.':'Discipline মানে এখনকার ইচ্ছার চেয়ে সবচেয়ে বড় ইচ্ছাকে বেছে নেওয়া।','Yesterday slipped — that is okay. Never miss twice: tick today.':'গতকাল পিছলে গেছে — ঠিক আছে। পরপর দুইদিন নয়: আজ tick করো।','#-day streak. Do not break the chain — today is one more link.':'#-দিনের streak। চেইন ভেঙো না — আজ আরেকটা link।','You are keeping #% of your habits. That is exactly the #–#% the plan asks for. Keep going.':'তুমি #% habit ঠিকমতো করছ। Plan ঠিক #–#%-ই চায়। চালিয়ে যাও।',
 'First day':'প্রথম দিন','#-day streak':'#-দিনের streak','# days in':'# দিন পার','Halfway (#)':'অর্ধেক পথ (#)','# perfect days':'# টা perfect দিন',
@@ -364,7 +618,7 @@ const BN={'Home':'হোম','Alarms':'অ্যালার্ম','90-Day Arc'
 'Month # · Foundation — finish the most important chapters first':'Month # · ভিত্তি · Foundation — আগে সবচেয়ে গুরুত্বপূর্ণ chapter শেষ করো','Month # · Momentum — medium-weight chapters':'Month # · গতি · Momentum — মাঝারি গুরুত্বের chapter','Month # · Mastery — remaining chapters + full revision':'Month # · দক্ষতা · Mastery — বাকি chapter + পুরো revision','Syllabus covered: #% (each box = #%)':'Syllabus শেষ: #% (প্রতি box = #%)','Start kg':'শুরুর ওজন (kg)','End kg':'শেষের ওজন (kg)','Chapters finished':'শেষ করা chapter','Best win 🏆':'সবচেয়ে বড় জয় 🏆','Biggest leak':'সবচেয়ে বড় leak','Next month resolution':'পরের মাসের সংকল্প','Letter to future me':'ভবিষ্যৎ আমাকে চিঠি',
 'Weekly Introspection':'সাপ্তাহিক আত্মসমীক্ষা','Every Friday night, # quiet minutes. Be honest, not harsh. # = weak, # = great.':'প্রতি শুক্রবার রাতে # মিনিট চুপচাপ বসো। নিজের সাথে সৎ হও, কঠোর নয়। # = দুর্বল, # = দারুণ।','Week':'সপ্তাহ','Study':'পড়াশোনা','Body · Gym + food':'শরীর · Gym + খাবার','Sleep':'ঘুম','Focus':'মনোযোগ','Avg weight kg':'গড় ওজন (kg)','Miss days':'Miss দিন','Weakest # topics':'সবচেয়ে দুর্বল # topic','Main error: Concept / Formula / Careless':'ভুলের কারণ: Concept / Formula / Careless','Win this week':'এই সপ্তাহের জয়','Biggest leak (where did time go?)':'সবচেয়ে বড় leak (সময় কোথায় গেল?)','Next week: # fix':'পরের সপ্তাহের #টা fix','Next week # targets':'পরের সপ্তাহের #টা target',
 'HSC # · # months full syllabus (Pareto #/#) · #→# kg · Salah + Sleep + Consistency':'HSC # · # মাসে full syllabus (Pareto #/#) · #→# kg · Salah + Sleep + Consistency','Daily budget & # non-negotiables':'দৈনিক সময় ও #টা non-negotiable','Weekly rotation (self-study)':'সাপ্তাহিক rotation (self-study)','#-week roadmap (tick when done)':'#-সপ্তাহের roadmap (শেষ হলে tick দাও)','Study system (Pareto)':'পড়ার system (Pareto)','Subject rules':'Subject-এর নিয়ম','Food plan (≈#–# kcal, protein #–#g)':'খাবারের plan (≈#–# kcal, protein #–#g)','Focus, tests & #+ checklist':'Focus, test ও #+ checklist','Chapter names are my reading of your PDF — match them to your textbook order.':'Chapter-এর নামগুলো তোমার PDF থেকে আমার পড়া — textbook-এর ক্রমের সাথে মিলিয়ে নিও।',
-'Continue with Google':'Google দিয়ে চালিয়ে যাও','or':'অথবা','Sign in':'Sign in','Preview: the real Firebase login comes in the mobile app. Tap any button to continue.':'Preview: আসল Firebase login থাকবে mobile app-এ। যেকোনো button চাপলেই এগোবে।','Written by':'লেখক','What should I call you?':'তোমাকে কী নামে ডাকব?','Your name':'তোমার নাম','Your starting weight':'তোমার এখনকার ওজন','Weight in kg':'ওজন (kg)','Target is # kg':'Target # kg','When is your HSC exam?':'HSC পরীক্ষা কবে?','Optional — it powers your countdown.':'ঐচ্ছিক — countdown চালাতে লাগবে।','Why are you doing this?':'কেন এটা করছ?','Your # rule':'তোমার #টা নিয়ম','Continue':'এগোও','Begin Day # ❄️':'Day # শুরু করো ❄️'};
+'Continue with Google':'Google দিয়ে চালিয়ে যাও','Continue to next task':'পরের কাজে যাও','or':'অথবা','Sign in':'Sign in','Preview: the real Firebase login comes in the mobile app. Tap any button to continue.':'Preview: আসল Firebase login থাকবে mobile app-এ। যেকোনো button চাপলেই এগোবে।','Written by':'লেখক','What should I call you?':'তোমাকে কী নামে ডাকব?','Your name':'তোমার নাম','Your starting weight':'তোমার এখনকার ওজন','Weight in kg':'ওজন (kg)','Target is # kg':'Target # kg','When is your HSC exam?':'HSC পরীক্ষা কবে?','Optional — it powers your countdown.':'ঐচ্ছিক — countdown চালাতে লাগবে।','Why are you doing this?':'কেন এটা করছ?','Your # rule':'তোমার #টা নিয়ম','Continue':'এগোও','Edit plan':'প্ল্যান সম্পাদনা','Save plan':'প্ল্যান সংরক্ষণ','Edit weeks':'সপ্তাহ সম্পাদনা','Save weeks':'সপ্তাহ সংরক্ষণ','Cancel':'বাতিল','Begin Day # ❄️':'Day # শুরু করো ❄️'};
 const O=new WeakMap();
 function trN(o){const nums=[];const c=o.replace(/\d+(\.\d+)?/g,x=>{nums.push(x);return '#'});const m=c.match(/^(\s*)([^\p{L}\p{N}#+\-]*)([\s\S]*?)(\s*)$/u);const v=BN[m[3]];if(!v)return o;let i=0;return m[1]+m[2]+v.replace(/#/g,()=>nums[i++]??'')+m[4]}
 function loc(r){const bn=S.lang=='bn';let ns=[];if(r.nodeType==3)ns=[r];else{const w=document.createTreeWalker(r,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode())ns.push(n)}
@@ -372,6 +626,7 @@ ns.forEach(n=>{const p=n.parentNode&&n.parentNode.nodeName;if(p=='SCRIPT'||p=='S
 if(r.querySelectorAll)r.querySelectorAll('[placeholder]').forEach(e=>{if(e.dataset.ph==null)e.dataset.ph=e.getAttribute('placeholder');e.setAttribute('placeholder',bn?trN(e.dataset.ph):e.dataset.ph)})}
 new MutationObserver(ms=>{if(S.lang!='bn')return;ms.forEach(m=>m.addedNodes.forEach(n=>{if(n.nodeType==1||n.nodeType==3)loc(n)}))}).observe(document.body,{childList:true,subtree:true});
 document.addEventListener('click',e=>{const t=e.target,l=t.closest('[data-lang]');if(l){S.lang=l.dataset.lang;persist();renderAll();ob();loc(document.body);return}
+const google=t.closest('[data-google]');if(google){signInWithGoogle(google.dataset.google==='onboarding');return}
 if(t.closest('[data-ob]')){const g=id=>$(id)?$(id).value:'';if(obs==1)S.name=g('on');if(obs==2&&g('ow'))setp('mo.1.w0',g('ow'));if(obs==3)S.hsc=g('oh');
 if(obs==4){S.why=g('oy');S.rule=g('or1');S.start=D0().toISOString();S.ob=1;persist();obs=0;ob();renderAll();checkAch();document.querySelector('nav button[data-p="0"]').click();loc(document.body);return}
 obs++;ob();loc($('ob'))}});
@@ -414,8 +669,8 @@ Object.assign(BN,{'Backup & Restore':'Backup ও Restore','Download backup':'Bac
 function backupCard(){const lb=S.lastBackup,old=!lb||(Date.now()-new Date(lb))/864e5>3;return `<h3>💾 Backup & Restore</h3><div class="card"><div class="d">Your data saves automatically. Download a backup file now and then so nothing is ever lost.</div><div class="d" style="margin-top:6px">${ref?'☁️ <span>Cloud sync is on</span>':'💾 <span>Stored in this browser only</span>'}</div><div class="d">🕒 <span>Last backup:</span> ${lb?new Date(lb).toLocaleDateString():'<span>Never</span>'}</div>${old?'<div class="d" style="color:var(--mut);font-weight:700;margin-top:6px">Backup recommended — it has been a while.</div>':''}<div class="row" style="justify-content:flex-start"><button class="btn" data-ex="1">Download backup</button><button class="btn g" data-im="1">Restore from file</button></div>${pend==='bad'?'<div class="d" style="color:var(--danger);margin-top:6px">That file is not a Winter Arc backup.</div>':pend?'<div class="d" style="margin-top:8px"><b>Replace all current data with this backup?</b></div><div class="row" style="justify-content:flex-start"><button class="btn" data-rs="y">Yes, restore</button><button class="btn g" data-rs="n">Cancel</button></div>':''}</div>`}
 async function exportData(){const data=JSON.stringify({app:'winter_arc',v:1,exported:new Date().toISOString(),state:S},null,1),fn='winter-arc-backup-'+new Date().toISOString().slice(0,10)+'.json';
 try{const a=document.createElement('a'),url=URL.createObjectURL(new Blob([data],{type:'application/json'}));a.href=url;a.download=fn;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);S.lastBackup=new Date().toISOString();persist();xpPop('💾 Backup saved')}catch(e){console.error('Could not create Winter Arc backup:',e);cloudMessage='Backup failed: '+e.message;drawSet()}drawHome()}
-$('imf').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);pend=o&&o.app=='winter_arc'&&o.state?o:'bad'}catch(x){pend='bad'}drawHome()};r.readAsText(f)};
-document.addEventListener('click',e=>{const t=e.target;if(t.closest('[data-ex]')){exportData()}else if(t.closest('[data-im]')){$('imf').click()}else if(t.closest('[data-rs]')){const y=t.closest('[data-rs]').dataset.rs=='y';if(y&&pend&&pend!=='bad'){S=Object.assign(dS(),pend.state);persist();pend=null;renderAll();ob();if(S.lang=='bn')loc(document.body);syncNativeAlarms(true);xpPop('✅ Restored')}else{pend=null;drawHome()}}});
+$('imf').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;if(f.size>2*1024*1024){pend='bad';cloudMessage='Backup exceeds the 2 MB safety limit.';drawSet();return}const r=new FileReader();r.onload=()=>{try{const o=JSON.parse(r.result);if(!o||o.app!=='winter_arc'||!o.state)throw new Error('This is not a Winter Arc backup.');pend={...o,state:sanitizeState(o.state)}}catch(x){console.error('Rejected invalid or unsafe Winter Arc backup:',x);pend='bad'}drawHome()};r.onerror=()=>{console.error('Could not read the selected Winter Arc backup:',r.error);pend='bad';drawHome()};r.readAsText(f)};
+document.addEventListener('click',e=>{const t=e.target;if(t.closest('[data-ex]')){exportData()}else if(t.closest('[data-im]')){$('imf').click()}else if(t.closest('[data-rs]')){const y=t.closest('[data-rs]').dataset.rs=='y';if(y&&pend&&pend!=='bad'){try{S=sanitizeState(pend.state);persist();pend=null;renderAll();ob();if(S.lang=='bn')loc(document.body);syncNativeAlarms(true);xpPop('✅ Restored')}catch(error){console.error('Could not restore the selected backup:',error);pend='bad';cloudMessage='Restore failed: '+error.message;drawSet()}}else{pend=null;drawHome()}}});
 Object.assign(BN,{'Test alarm':'Alarm test করো','Rings in # seconds':'# সেকেন্ড পর বাজবে','Edit alarm':'Alarm বদলাও','New alarm':'নতুন alarm','Label':'নাম','Repeat':'কোন কোন দিন','Default sound':'Default sound','Custom sound selected':'নিজের sound বাছা হয়েছে','Pick from your device':'Device থেকে বাছো','Choose':'বাছো','Next:':'পরের:','Less':'কম','More':'বেশি','Tap a square to open that day. Green gets deeper with more habits; #/# = a full day. Day #·#·# = review day.':'যেকোনো square-এ tap করে সেই দিন দেখো। যত বেশি habit, তত গাঢ় সবুজ; #/# = full দিন। Day #·#·# = review day।'});
 $('ef').onchange=()=>{const f=$('ef').files[0];if(f)$('esn').textContent=f.name};
 $('cvf').onchange=e=>{const f=e.target.files[0];e.target.value='';if(!f)return;const im=new Image(),u=URL.createObjectURL(f);im.onload=()=>{const W=900,H=340,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d'),r=Math.max(W/im.width,H/im.height),w=im.width*r,h=im.height*r;x.drawImage(im,(W-w)/2,(H-h)/2,w,h);let q=.75,d=c.toDataURL('image/jpeg',q);while(d.length>110000&&q>.3){q-=.1;d=c.toDataURL('image/jpeg',q)}URL.revokeObjectURL(u);S.cover=d;persist();drawHome()};im.src=u};
@@ -435,7 +690,7 @@ let smb;function smLock(){$('smh2').textContent=S.smLim+' minutes are used';$('s
 $('smok').onclick=()=>{$('smx').classList.remove('s');clearInterval(smb)};
 setInterval(()=>{const s=smSync();if(s.run){if(smUsed()>=S.smLim*60){s.used=S.smLim*60;s.run=0;persist();drawSM();smLock()}else tickSM()}},1000);
 const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function accountCard(){const msg=cloudMessage?`<div class="d" role="status" style="color:var(--danger);margin-top:8px">${escapeHtml(cloudMessage)}</div>`:'';if(!auth)return `<h3>☁️ Firebase account</h3><div class="card"><div class="d">${escapeHtml(cloudMessage||'Cloud sync is not configured. Your data is saved on this device.')}</div></div>`;if(authUser)return `<h3>☁️ Firebase account</h3><div class="card"><div class="d">Signed in as <b>${escapeHtml(authUser.email||'Firebase user')}</b></div>${msg}<div class="row" style="justify-content:flex-start"><button class="btn g" data-auth="signout">Sign out</button></div></div>`;return `<h3>☁️ Firebase account</h3><div class="card"><div class="d">Sign in or create a free account to sync achievements and progress across devices. Your data also stays saved locally.</div><input type="text" id="cloudEmail" placeholder="Email address" autocomplete="email"><input type="password" id="cloudPassword" placeholder="Password (at least 6 characters)" autocomplete="current-password">${msg}<div class="row" style="justify-content:flex-start"><button class="btn" data-auth="signup">Create account</button><button class="btn g" data-auth="signin">Sign in</button></div></div>`}
+function accountCard(){const msg=cloudMessage?`<div class="d" role="status" style="color:var(--danger);margin-top:8px">${escapeHtml(cloudMessage)}</div>`:'';if(!auth)return `<h3>☁️ Firebase account</h3><div class="card"><div class="d">${escapeHtml(cloudMessage||'Cloud sync is not configured. Your data is saved on this device.')}</div></div>`;if(authUser)return `<h3>☁️ Firebase account</h3><div class="card"><div class="d">Signed in as <b>${escapeHtml(authUser.email||'Firebase user')}</b></div>${msg}<div class="row" style="justify-content:flex-start"><button class="btn g" data-auth="signout">Sign out</button></div></div>`;return `<h3>☁️ Firebase account</h3><div class="card"><div class="d">Sign in or create a free account to sync achievements and progress across devices. Your data also stays saved locally.</div><button class="btn gg full" data-google="settings" ${googleBusy?'disabled':''}>${googleBusy?'Connecting…':'Continue with Google'}</button>${googleMessage?`<div class="d" role="status">${escapeHtml(googleMessage)}</div>`:''}<input type="text" id="cloudEmail" placeholder="Email address" autocomplete="email"><input type="password" id="cloudPassword" placeholder="Password (at least 6 characters)" autocomplete="current-password">${msg}<div class="row" style="justify-content:flex-start"><button class="btn" data-auth="signup">Create account</button><button class="btn g" data-auth="signin">Sign in</button></div></div>`}
 async function accountAction(mode){if(!auth){cloudMessage='Firebase is not configured yet. Add the web app settings in firebase-config.js.';drawSet();return}try{cloudMessage='';if(mode==='signout'){if(ref){clearTimeout(tm);await ref.set({state:JSON.parse(JSON.stringify(S)),updatedAt:localChangedAt})}await auth.signOut();return}const email=$('cloudEmail').value.trim(),password=$('cloudPassword').value;if(!email||!password){cloudMessage='Enter your email address and password.';drawSet();return}authChoiceRequired=true;if(mode==='signup')await auth.createUserWithEmailAndPassword(email,password);else await auth.signInWithEmailAndPassword(email,password)}catch(e){authChoiceRequired=false;console.error('Firebase account action failed:',e);cloudMessage=e.message;drawSet()}}
 function drawSet(){if(!$('set').classList.contains('s'))return;$('setc').innerHTML=`<h3>Language</h3><div class="card lang-setting"><div class="lang-copy"><b>App language</b><div class="d">Choose your preferred app language.</div></div>${lang()}</div>${accountCard()}<h3>Cover photo</h3><div class="card" style="display:flex;gap:12px;align-items:center"><div class="cpv" style="${S.cover?'background-image:url('+S.cover+')':''}"></div><div class="d" style="flex:1">Shown behind your day counter on Home.</div><button class="btn g" data-cam="1">Choose</button>${S.cover?'<button class="btn g" data-camx="1">Reset</button>':''}</div><h3>Social media limit</h3><div class="card" style="display:flex;align-items:center;gap:10px"><div style="flex:1"><b>${S.smLim} min per day</b><div class="d">Your daily budget on the Home timer.</div></div><button class="btn g" data-lm="-5">−5</button><button class="btn g" data-lm="5">+5</button></div>${backupCard()}`}
 function drawHome(){drawHome0();drawSM();drawSet()}
@@ -445,8 +700,8 @@ document.addEventListener('click',e=>{const t=e.target,b=t.closest('[data-sm]'),
 if(t.closest('[data-set]')){$('set').classList.add('s');drawSet();loc($('set'))}
 else if(l){S.smLim=Math.max(5,Math.min(120,S.smLim+ +l.dataset.lm));persist();drawSM();drawSet()}
 else if(b){const a=b.dataset.sm;if(a=='start')smStart();else if(a=='stop')smStop();else{smSync().used+=300;persist();drawSM();if(smUsed()>=S.smLim*60)smLock()}}});
-Object.assign(BN,{'Language':'ভাষা','App language':'অ্যাপের ভাষা','Choose your preferred app language.':'অ্যাপের পছন্দের ভাষা বেছে নাও','Social media today':'আজকের social media','Start session':'Session শুরু করো','Stop timer':'Timer থামাও','+# min used elsewhere':'অন্য জায়গায় +# মিনিট গেছে','Limit reached':'Limit শেষ','Used # of # min':'ব্যবহার # / # মিনিট','Start the timer before you open a social app. It rings when your limit is up.':'Social app খোলার আগে timer চালাও। limit শেষ হলে বাজবে।','No more social media today. Come back tomorrow.':'আজ আর social media নয়। কাল আবার।','Start now':'এখনই শুরু করো','Settings':'সেটিংস','Cover photo':'Cover ছবি','Reset':'রিসেট','Close':'বন্ধ করো','Social media limit':'Social media limit','# min per day':'প্রতিদিন # মিনিট','Shown behind your day counter on Home.':'Home-এর day counter-এর পেছনে দেখা যাবে।','Time is up':'সময় শেষ','Done, I closed it':'বন্ধ করেছি'});
+Object.assign(BN,{'Language':'ভাষা','App language':'অ্যাপের ভাষা','Choose your preferred app language.':'অ্যাপের পছন্দের ভাষা বেছে নাও','Social media today':'আজকের social media','Start session':'Session শুরু করো','Stop timer':'Timer থামাও','+# min used elsewhere':'অন্য জায়গায় +# মিনিট গেছে','Limit reached':'Limit শেষ','Used # of # min':'ব্যবহার # / # মিনিট','Start the timer before you open a social app. It rings when your limit is up.':'Social app খোলার আগে timer চালাও। limit শেষ হলে বাজবে।','No more social media today. Come back tomorrow.':'আজ আর social media নয়। কাল আবার।','Start now':'এখনই শুরু করো','Settings':'সেটিংস','Cover photo':'Cover ছবি','Reset':'রিসেট','Close':'বন্ধ করো','Social media limit':'Social media limit','# min per day':'প্রতিদিন # মিনিট','Shown behind your day counter on Home.':'Home-এর day counter-এর পেছনে দেখা যাবে।','Time is up':'সময় শেষ','Done, I closed it':'বন্ধ করেছি','Custom countdown':'নিজের মতো countdown','Minutes':'মিনিট','Seconds':'সেকেন্ড','Start timer':'Timer শুরু করো','Cancel timer':'Timer বাতিল','Timer running':'Timer চলছে','Time is up.':'সময় শেষ।','Choose a duration from # second to # hours.':'# সেকেন্ড থেকে # ঘণ্টার সময় বেছে নাও।','Continue with Google':'Google দিয়ে চালিয়ে যাও','Continue without an account':'অ্যাকাউন্ট ছাড়া চালিয়ে যাও','Connecting…':'সংযোগ হচ্ছে…','Sign in with Google to sync your progress across devices. You can also use the app without an account.':'সব ডিভাইসে অগ্রগতি sync করতে Google দিয়ে sign in করো। অ্যাকাউন্ট ছাড়াও app ব্যবহার করতে পারো।'});
 
-renderAll();$('add').style.display='none';ob();if(S.lang=='bn')loc(document.body);setupNativeAlarms();
+renderAll();$('add').style.display='none';ob();if(S.lang=='bn')loc(document.body);setupNativeAlarms();if(countdown){if(countdown.dueAt<=Date.now())finishCountdown();else{renderCountdown();countdownTicker=setInterval(renderCountdown,1000)}}
 initFirebase();
 </script><script>if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(e=>console.error('Could not register the Winter Arc offline app:',e));</script></body></html>

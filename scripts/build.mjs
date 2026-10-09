@@ -1,4 +1,4 @@
-import { mkdir, copyFile, access, writeFile } from 'node:fs/promises';
+import { mkdir, copyFile, access, readFile, writeFile } from 'node:fs/promises';
 import { build } from 'esbuild';
 import { generateAlarmSound } from './alarm-sound.mjs';
 
@@ -12,6 +12,22 @@ await Promise.all([
   copyFile('icon-192.png', 'www/icon-192.png'),
   copyFile('icon-512.png', 'www/icon-512.png')
 ]);
+const nativeAuthConfig = {};
+try {
+  const androidConfig = JSON.parse(await readFile('android/app/google-services.json', 'utf8'));
+  const webClientId = androidConfig.client?.[0]?.oauth_client?.find(client => client.client_type === 3)?.client_id;
+  if (webClientId) nativeAuthConfig.googleWebClientId = webClientId;
+} catch (error) {
+  if (error.code !== 'ENOENT') throw error;
+}
+try {
+  const iosConfig = await readFile('ios/App/App/GoogleService-Info.plist', 'utf8');
+  const clientId = iosConfig.match(/<key>CLIENT_ID<\/key>\s*<string>([^<]+)<\/string>/)?.[1];
+  if (clientId) nativeAuthConfig.googleIosClientId = clientId;
+} catch (error) {
+  if (error.code !== 'ENOENT') throw error;
+}
+await writeFile('www/native-auth-config.js', `window.WINTERARC_NATIVE_AUTH_CONFIG = ${JSON.stringify(nativeAuthConfig)};\n`);
 await build({
   entryPoints: ['scripts/native-plugins.js'],
   bundle: true,

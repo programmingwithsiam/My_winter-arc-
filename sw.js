@@ -1,4 +1,4 @@
-const CACHE_NAME = 'winter-arc-shell-v1';
+const CACHE_NAME = 'winter-arc-shell-v2';
 const APP_SHELL = [
   './',
   './index.html',
@@ -7,6 +7,7 @@ const APP_SHELL = [
   './icon-192.png',
   './icon-512.png',
   './firebase-config.js',
+  './native-auth-config.js',
   './native-plugins.js'
 ];
 
