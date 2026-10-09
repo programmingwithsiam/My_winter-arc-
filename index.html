@@ -505,7 +505,7 @@ function unlockAudio(){
 function prepareAlarmAudio(){unlockAudio().catch(error=>console.error('Could not prepare alarm audio:',error))}
 document.addEventListener('pointerdown',prepareAlarmAudio,{once:true});document.addEventListener('keydown',prepareAlarmAudio,{once:true});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&ac&&ac.state==='suspended')ac.resume().catch(error=>{console.error('Could not resume alarm audio after returning to the app:',error);updateAlarmSoundStatus('Audio paused by iOS. Tap Test sound to enable it again.')})});
-function getFallbackAlarmAudio(){if(!fallbackAlarmAudio){fallbackAlarmAudio=new Audio('./winter_arc_alarm.wav');fallbackAlarmAudio.preload='auto';fallbackAlarmAudio.loop=true}return fallbackAlarmAudio}
+function getFallbackAlarmAudio(){if(!fallbackAlarmAudio){fallbackAlarmAudio=new Audio('./winter_arc_alarm.wav');fallbackAlarmAudio.preload='auto';fallbackAlarmAudio.loop=true;fallbackAlarmAudio.playsInline=true}return fallbackAlarmAudio}
 function playFallbackAlarm(name,generation){
  try{
   const audio=getFallbackAlarmAudio();audio.currentTime=0;audio.volume=.9;
@@ -570,7 +570,14 @@ function startAlarm(soundName=selectedAlarmSound){
 }
 function beep(){unlockAudio().then(()=>{if(!ac||ac.state!=='running')throw new Error('Audio is still suspended. Tap Test sound to enable it.');const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=880;g.gain.value=.3;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.3)}).catch(e=>{console.error('Could not play alarm sound:',e);if(cur&&cur.id===-2)showCountdownStatus('Time is up, but browser audio could not start. Tap Test sound and keep this page open.')})}
 $('alarmSound').value=selectedAlarmSound;$('alarmSound').onchange=event=>setAlarmSound(event.target.value);
-$('testAlarmSound').onclick=()=>startAlarm($('alarmSound').value);
+$('testAlarmSound').onclick=()=>{
+ const name=$('alarmSound').value;
+ if(/iPhone|iPad|iPod/i.test(navigator.userAgent)&&!nativePlatform()){
+  setAlarmSound(name);stopAlarm();playFallbackAlarm(name,alarmGeneration);
+  return;
+ }
+ startAlarm(name);
+};
 $('stopAlarmSound').onclick=()=>{stopAlarm();updateAlarmSoundStatus('Alarm sound stopped.');if(cur&&cur.id===-2&&$('ring').classList.contains('s'))stop()};
 let rctx={};
 function ring(i){if(bt)clearInterval(bt);if(snd){snd.pause();snd=null}stopAlarm();cur=i;const td=sched(),n=new Date(),mi=n.getHours()*60+n.getMinutes(),ix=td.findIndex(x=>x.id==i.id);rctx=i.id===-2?{}:ix>=0?{p:td[ix-1],n:td[ix+1]}:{p:[...td].reverse().find(x=>x.h*60+x.m<=mi),n:td.find(x=>x.h*60+x.m>mi)};
