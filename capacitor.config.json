@@ -1,0 +1,13 @@
+{
+  "appId": "com.codewithsiam.mywinterarc",
+  "appName": "My Winter Arc",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "sound": "winter_arc_alarm.wav"
+    }
+  }
+}
