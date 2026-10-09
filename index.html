@@ -228,7 +228,7 @@ const DEF=[[1,'Fajr + water + fresh start',5,30,ALL],[2,'Weigh-in (empty stomach
 const HB=['Wake on time','Self-study 6h','Online class done','Tuition 1.5h','Gym (Fri off)','Protein-rich food','Water target','5x Salah','Phone-free focus','Revision 30 min','Sleep 7.5h','Mistake Notebook'];
 const $=id=>document.getElementById(id),p2=n=>String(n).padStart(2,'0'),fmt=i=>(i.h%12||12)+':'+p2(i.m)+' '+(i.h<12?'AM':'PM');
 const dS=()=>({items:DEF.map(i=>({...i,days:[...i.days]})),cover:'',ach:{},blk:{},achInit:0,name:'',lang:'en',smLim:30,sm:{d:'',used:0,run:0},ob:0,hsc:'',start:null,sel:0,why:'',rule:'',log:{},score:{},mo:{},wk:{},road:{},planHtml:null,weeksHtml:null,lastBackup:''});
-let S=dS(),sounds={},ref=null,tm=null,auth=null,db=null,authUser=null,cloudMessage='',authChoiceRequired=false,localChangedAt=0,cloudUnsubscribe=null,hasLocalTimestamp=false,socialLoginReady=null,googleBusy=false,googleMessage='',firebaseReady=false,firebaseLoadPromise=null;
+let S=dS(),sounds={},ref=null,tm=null,auth=null,db=null,authUser=null,cloudMessage='',authChoiceRequired=false,cloudSyncPaused=false,localChangedAt=0,cloudUnsubscribe=null,hasLocalTimestamp=false,socialLoginReady=null,googleBusy=false,googleMessage='',firebaseReady=false,firebaseLoadPromise=null;
 let hasLocalData=false;
 const FORBIDDEN_KEYS=new Set(['__proto__','prototype','constructor']);
 function cloneSafeData(value,depth=0,budget={nodes:0}){
@@ -281,22 +281,35 @@ function sanitizeState(input){
 try{const saved=localStorage.getItem('wa2');hasLocalData=!!saved;if(saved){if(saved.length>2*1024*1024)throw new Error('Saved data exceeds the 2 MB safety limit.');S=sanitizeState(JSON.parse(saved))}const timestamp=localStorage.getItem('wa2-updated-at');hasLocalTimestamp=timestamp!==null;localChangedAt=Number(timestamp)||0}catch(e){console.error('Could not safely load saved Winter Arc data:',e);cloudMessage='Saved data could not be read safely. Restore a valid backup or clear this device’s saved app data.'}
 S.items=(Array.isArray(S.items)?S.items:DEF).map(i=>({...i,topic:Number.isInteger(i.topic)&&i.topic>=0&&i.topic<ATOP.length?i.topic:defaultAlarmTopic(i.id),msg:typeof i.msg==='string'?i.msg:''}));
 function storeLocal(){try{localStorage.setItem('wa2',JSON.stringify(S));localStorage.setItem('wa2-updated-at',String(localChangedAt));hasLocalData=true;hasLocalTimestamp=true;return true}catch(e){console.error('Could not save Winter Arc data locally:',e);$('bd').textContent='⚠️ local save failed';cloudMessage='Local save failed: '+e.message;return false}}
-function persist(){localChangedAt=Math.max(Date.now(),localChangedAt+1);const saved=storeLocal();if(!saved)return;if(!ref){$('bd').textContent=navigator.onLine===false?'💾 local · offline':authUser?'☁️ waiting for sync':'💾 local';return}clearTimeout(tm);tm=setTimeout(()=>{const changedAt=localChangedAt;ref.set({state:JSON.parse(JSON.stringify(S)),updatedAt:changedAt}).then(()=>{if(changedAt===localChangedAt)$('bd').textContent='☁️ saved'}).catch(e=>{console.error('Could not sync Winter Arc data to Firebase:',e);cloudMessage='Cloud save failed: '+e.message;$('bd').textContent='⚠️ cloud save failed';drawSet()})},700)}
+function persist(){localChangedAt=Math.max(Date.now(),localChangedAt+1);const saved=storeLocal();if(!saved)return;if(cloudSyncPaused){$('bd').textContent='⚠️ local only · sync paused';return}if(!ref){$('bd').textContent=navigator.onLine===false?'💾 local · offline':authUser?'☁️ waiting for sync':'💾 local';return}clearTimeout(tm);tm=setTimeout(()=>{const changedAt=localChangedAt;ref.set({state:JSON.parse(JSON.stringify(S)),updatedAt:changedAt}).then(()=>{if(changedAt===localChangedAt)$('bd').textContent='☁️ saved'}).catch(e=>{console.error('Could not sync Winter Arc data to Firebase:',e);cloudMessage='Cloud save failed: '+e.message;$('bd').textContent='⚠️ cloud save failed';drawSet()})},700)}
 const getp=p=>p.split('.').reduce((o,k)=>o==null?o:o[k],S);
 function setp(p,v){const a=p.split('.');let o=S;for(let i=0;i<a.length-1;i++)o=o[a[i]]=o[a[i]]||{};o[a[a.length-1]]=v;persist()}
 function applyCloudState(state,updatedAt){S=sanitizeState(state);localChangedAt=Number(updatedAt)||Date.now();storeLocal();renderAll();ob();if(S.lang=='bn')loc(document.body);syncNativeAlarms(true)}
 async function connectCloud(user){
   authUser=user;let notice='';clearTimeout(tm);if(cloudUnsubscribe){cloudUnsubscribe();cloudUnsubscribe=null}
   ref=user?db.collection('users').doc(user.uid).collection('appData').doc('state'):null;
-  if(!user){cloudMessage='';$('bd').textContent='💾 local';drawSet();return}
+  if(!user){cloudSyncPaused=false;cloudMessage='';$('bd').textContent='💾 local';drawSet();return}
+  if(cloudSyncPaused){cloudMessage='Cloud sync is paused to protect both copies. Sign out and sign in again to choose which copy to keep.';drawSet();return}
   try{
     const snap=await ref.get(),remote=snap.exists?snap.data():null;
     if(remote&&remote.state){
-      if((authChoiceRequired||(!hasLocalTimestamp&&hasLocalData))&&hasLocalData&&confirm('A cloud save already exists. Choose OK to restore it on this device. Choose Cancel to keep this device’s data and upload it to your cloud account.')){
-        applyCloudState(remote.state,remote.updatedAt);
-      }else if((authChoiceRequired||(!hasLocalTimestamp&&hasLocalData))&&hasLocalData){
-        notice='This device’s data was kept and uploaded to your account.';
-        persist();
+      if((authChoiceRequired||(!hasLocalTimestamp&&hasLocalData))&&hasLocalData){
+        const restoreCloud=confirm(S.lang==='bn'
+          ?'এই device-এর data বদলে cloud-এর progress আনা হবে। আগে দরকারি হলে backup নাও। OK চাপলে cloud data আসবে; Cancel চাপলে এই device-এর copy রাখার আরেকটি প্রশ্ন আসবে।'
+          :'Restoring the cloud save will replace data on this device. Download a backup first if needed. Choose OK to restore cloud data; Cancel to review keeping this device’s copy.');
+        if(restoreCloud)applyCloudState(remote.state,remote.updatedAt);
+        else if(confirm(S.lang==='bn'
+          ?'এই device-এর data দিলে cloud-এর পুরোনো progress—অন্য phone-এর data-সহ—বদলে যাবে। নিশ্চিত হলে OK চাপো। Cancel করলে দুই copy-ই থাকবে, sync বন্ধ থাকবে।'
+          :'Uploading this device will replace the cloud save, including progress from other phones. Choose OK only if this is the copy you want to keep. Cancel keeps both copies and pauses sync.')){
+          notice='This device’s data was kept and uploaded to your account.';
+          persist();
+        }else{
+          cloudSyncPaused=true;
+          cloudMessage='Both copies were kept. This device is saved locally, and cloud sync is paused. Sign out and sign in again to choose a copy.';
+          $('bd').textContent='⚠️ local only · sync paused';
+          drawSet();
+          return;
+        }
       }else if(hasLocalData&&localChangedAt>Number(remote.updatedAt||0)){
         notice='This device has newer saved data; syncing it to the cloud.';
         persist();
@@ -336,7 +349,7 @@ function updateAlarmPlatformGuidance(){
  const native=nativePlatform();
  $('alarmPlatformNote').textContent=native
   ?'Native alarm alerts require notification permission. Test them on this device before relying on them.'
-  :'This web app cannot reliably ring when the iPhone is locked, Safari is backgrounded, or the app is closed. Use the iPhone Clock app for dependable alarms.';
+  :'If an alarm is silent, tap Test sound and check media volume and Silent mode. This web app cannot reliably ring when the iPhone is locked, Safari is backgrounded, or the app is closed. Use the iPhone Clock app for dependable locked-screen alarms.';
  $('timerPlatformNote').textContent=native
   ?'Choose a duration. A background notification can be scheduled when notification permission is enabled.'
   :'A countdown here only works while the page is active; iOS may pause it when the screen locks or you leave Safari. Use Clock for alarms while the phone is locked.';
@@ -369,11 +382,13 @@ async function signInWithGoogle(fromOnboarding=false){
       const response=await window.WinterArcNative.SocialLogin.login({provider:'google',options:{scopes:['email','profile']}});
       if(!response.result.idToken)throw new Error('Google did not return an ID token. Check the platform OAuth configuration.');
       const credential=firebase.auth.GoogleAuthProvider.credential(response.result.idToken);
+      authChoiceRequired=true;
       await auth.signInWithCredential(credential);
     }else{
       const provider=new firebase.auth.GoogleAuthProvider();
       provider.addScope('email');provider.addScope('profile');
       provider.setCustomParameters({prompt:'select_account'});
+      authChoiceRequired=true;
       await auth.signInWithPopup(provider);
     }
     googleMessage='';
@@ -472,7 +487,7 @@ function edit(i){editing=i||{id:Date.now()%1e7+100,label:'',h:6,m:0,days:[],on:t
 $('add').onclick=()=>edit();$('ecan').onclick=()=>$('ed').classList.remove('s');
 $('edel').onclick=()=>{S.items=S.items.filter(x=>x.id!=editing.id);persist();drawA();$('ed').classList.remove('s');syncNativeAlarms(true)};
 $('esv').onclick=()=>{const[a,b]=$('et').value.split(':').map(Number);editing.label=$('el').value.trim()||'Alarm';editing.h=a;editing.m=b;editing.topic=+$('etopic').value;editing.msg=$('emsg').value.trim();editing.days=[...$('ec').querySelectorAll('input:checked')].map(x=>+x.value);if(editing.days.length){delete editing.onceAt}else{const at=new Date();at.setHours(a,b,0,0);if(at<=new Date())at.setDate(at.getDate()+1);editing.onceAt=at.toISOString()}const f=$('ef').files[0];if(f)sounds[editing.id]=URL.createObjectURL(f);if(editing._n){delete editing._n;S.items.push(editing)}expandedAlarmId=editing.id;persist();drawA();$('ed').classList.remove('s');syncNativeAlarms(true)};
-let ac,bt,cur,snd,fired={},alarmLoopTimer=null,alarmGeneration=0,activeAlarmNodes=new Set();
+let ac,bt,cur,snd,fired={},alarmLoopTimer=null,alarmGeneration=0,activeAlarmNodes=new Set(),fallbackAlarmAudio=null;
 const TIMER_SOUND_KEY='wa2-alarm-sound',ALARM_SOUNDS=new Set(['digital','chime','sunrise','zen','siren']);
 function readAlarmSound(){try{const saved=localStorage.getItem(TIMER_SOUND_KEY);return ALARM_SOUNDS.has(saved)?saved:'digital'}catch(e){console.error('Could not read the saved alarm sound:',e);return'digital'}}
 let selectedAlarmSound=readAlarmSound();
@@ -489,6 +504,22 @@ function unlockAudio(){
 }
 function prepareAlarmAudio(){unlockAudio().catch(error=>console.error('Could not prepare alarm audio:',error))}
 document.addEventListener('pointerdown',prepareAlarmAudio,{once:true});document.addEventListener('keydown',prepareAlarmAudio,{once:true});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&ac&&ac.state==='suspended')ac.resume().catch(error=>{console.error('Could not resume alarm audio after returning to the app:',error);updateAlarmSoundStatus('Audio paused by iOS. Tap Test sound to enable it again.')})});
+function getFallbackAlarmAudio(){if(!fallbackAlarmAudio){fallbackAlarmAudio=new Audio('./winter_arc_alarm.wav');fallbackAlarmAudio.preload='auto';fallbackAlarmAudio.loop=true}return fallbackAlarmAudio}
+function playFallbackAlarm(name,generation){
+ try{
+  const audio=getFallbackAlarmAudio();audio.currentTime=0;audio.volume=.9;
+  audio.play().then(()=>{
+   if(generation!==alarmGeneration){audio.pause();return}
+   $('stopAlarmSound').disabled=false;
+   updateAlarmSoundStatus(`${name==='zen'?'Zen Bowl':name[0].toUpperCase()+name.slice(1)} Web Audio is unavailable; backup alarm sound is playing.`);
+  }).catch(error=>{
+   if(generation!==alarmGeneration)return;
+   console.error('Could not play the backup alarm audio:',error);
+   updateAlarmSoundStatus('Could not play alarm sound. Tap Test sound once, check iPhone volume and silent mode, then try again.');
+  });
+ }catch(error){console.error('Could not prepare the backup alarm audio:',error);updateAlarmSoundStatus('Could not play alarm sound: '+error.message)}
+}
 function setAlarmSound(value){
  if(!ALARM_SOUNDS.has(value))return;
  selectedAlarmSound=value;
@@ -523,25 +554,27 @@ function playAlarmPattern(name){
 function stopAlarm(){
  alarmGeneration++;if(alarmLoopTimer){clearInterval(alarmLoopTimer);alarmLoopTimer=null}
  for(const oscillator of activeAlarmNodes){try{oscillator.stop()}catch(error){console.error('Could not stop an alarm tone:',error)}}
- activeAlarmNodes.clear();$('stopAlarmSound').disabled=true;
+ activeAlarmNodes.clear();if(fallbackAlarmAudio){fallbackAlarmAudio.pause();fallbackAlarmAudio.currentTime=0}$('stopAlarmSound').disabled=true;
 }
 function startAlarm(soundName=selectedAlarmSound){
  const name=ALARM_SOUNDS.has(soundName)?soundName:selectedAlarmSound;
  $('alarmSound').value=name;setAlarmSound(name);stopAlarm();
  const generation=alarmGeneration;
+ if(!(window.AudioContext||window.webkitAudioContext)){playFallbackAlarm(name,generation);return}
  unlockAudio().then(()=>{
   if(generation!==alarmGeneration)return;
+  if(!ac||ac.state!=='running'){playFallbackAlarm(name,generation);return}
   playAlarmPattern(name);alarmLoopTimer=setInterval(()=>playAlarmPattern(name),({digital:1050,chime:1450,sunrise:1650,zen:1850,siren:1020}[name]));
   $('stopAlarmSound').disabled=false;updateAlarmSoundStatus(`${name==='zen'?'Zen Bowl':name[0].toUpperCase()+name.slice(1)} sound playing. Press Stop sound to stop it.`);
- }).catch(error=>{console.error('Could not start the selected alarm sound:',error);updateAlarmSoundStatus('Could not play alarm sound: '+error.message)});
+ }).catch(error=>{if(generation!==alarmGeneration)return;console.error('Could not start the selected Web Audio alarm sound:',error);playFallbackAlarm(name,generation)});
 }
-function beep(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=880;g.gain.value=.3;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.3)}catch(e){console.error('Could not play alarm sound:',e);if(cur&&cur.id===-2)showCountdownStatus('Time is up, but browser audio could not start. Enable sound and keep this page open.')}}
+function beep(){unlockAudio().then(()=>{if(!ac||ac.state!=='running')throw new Error('Audio is still suspended. Tap Test sound to enable it.');const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=880;g.gain.value=.3;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.3)}).catch(e=>{console.error('Could not play alarm sound:',e);if(cur&&cur.id===-2)showCountdownStatus('Time is up, but browser audio could not start. Tap Test sound and keep this page open.')})}
 $('alarmSound').value=selectedAlarmSound;$('alarmSound').onchange=event=>setAlarmSound(event.target.value);
 $('testAlarmSound').onclick=()=>startAlarm($('alarmSound').value);
 $('stopAlarmSound').onclick=()=>{stopAlarm();updateAlarmSoundStatus('Alarm sound stopped.');if(cur&&cur.id===-2&&$('ring').classList.contains('s'))stop()};
 let rctx={};
 function ring(i){if(bt)clearInterval(bt);if(snd){snd.pause();snd=null}stopAlarm();cur=i;const td=sched(),n=new Date(),mi=n.getHours()*60+n.getMinutes(),ix=td.findIndex(x=>x.id==i.id);rctx=i.id===-2?{}:ix>=0?{p:td[ix-1],n:td[ix+1]}:{p:[...td].reverse().find(x=>x.h*60+x.m<=mi),n:td.find(x=>x.h*60+x.m>mi)};
-rctx.m=mi;rctx.now=fmt({h:n.getHours(),m:n.getMinutes()});$('rt').textContent=i.label;$('rd').textContent=i.msg||DET[i.id]||'';$('rtm').textContent=fmt({h:n.getHours(),m:n.getMinutes()});$('rq').textContent=MSG[Math.floor(Math.random()*MSG.length)];pv();$('ring').classList.add('s');if(navigator.vibrate)navigator.vibrate([400,200,400]);if(i.id===-2&&!nativePlatform())startAlarm(selectedAlarmSound);else if(sounds[i.id]){snd=new Audio(sounds[i.id]);snd.loop=true;snd.play().catch(e=>console.error('Could not play the alarm audio file:',e))}else{beep();bt=setInterval(beep,700)}}
+rctx.m=mi;rctx.now=fmt({h:n.getHours(),m:n.getMinutes()});$('rt').textContent=i.label;$('rd').textContent=i.msg||DET[i.id]||'';$('rtm').textContent=fmt({h:n.getHours(),m:n.getMinutes()});$('rq').textContent=MSG[Math.floor(Math.random()*MSG.length)];pv();$('ring').classList.add('s');if(navigator.vibrate)navigator.vibrate([400,200,400]);if(sounds[i.id]){snd=new Audio(sounds[i.id]);snd.loop=true;snd.play().catch(e=>{console.error('Could not play the alarm audio file:',e);startAlarm(selectedAlarmSound)})}else startAlarm(selectedAlarmSound)}
 function pv(){const p=rctx.p,n=rctx.n,b=S.blk[dayNo()]||{};let ev='';if(n){const x=n.h*60+n.m-rctx.m;ev=x>=60?Math.floor(x/60)+' h '+x%60+' min':x+' min'}
 $('pv').innerHTML=p?`<div class="k">Time's up · ${fmt(p)} → ${rctx.now}</div><div class="t2">${escapeHTML(p.label)}</div>${b[p.id]?'<div class="chk"><span class="bx2"></span><b>Completed ✓</b></div>':`<div class="d2">Did you finish it?</div><div class="yn"><button class="y" data-bd="${p.id}">✓ Yes, done</button><button data-no="1">Not yet</button></div>`}`:'';
 $('nxb').innerHTML=n?`<div class="k">After this · ${fmt(n)} · in ${ev}</div><div class="t2">${escapeHTML(n.label)}</div><div class="d2">${escapeHTML(DET[n.id]||'')}</div>`:''}
@@ -746,7 +779,7 @@ return `<div class="ghw"><div class="gh" style="grid-template-columns:repeat(${c
 function confetti(){if(navigator.vibrate)navigator.vibrate(120);const c=['var(--on)','var(--gold)','var(--on)','var(--on)'];for(let i=0;i<42;i++){const e=document.createElement('i');e.className='cf';e.style.left=Math.random()*100+'vw';e.style.background=c[i%4];e.style.animationDelay=Math.random()*.5+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),3200)}}
 let obs=0;
 function ob(){const el=$('ob');if(S.ob){el.classList.remove('s');return}el.classList.add('s');const dots=`<div class="dots">${[1,2,3,4].map(i=>`<i class="${i==obs?'on':''}"></i>`).join('')}</div>`;
-const F=[`<div class="obh">${cover()}<h1>My Winter Arc</h1><div class="sub">My 90-Day Winter Challenge</div><div class="d">HSC 2027 · STUDY · BODY · MIND</div></div><button class="btn gg full" data-google="onboarding" ${googleBusy?'disabled':''}>${googleBusy?'Connecting…':'Continue with Google'}</button>${googleMessage?`<div class="note" role="status">${escapeHtml(googleMessage)}</div>`:''}<div class="or">or</div><button class="btn full" data-ob="1">Continue without an account</button><div class="note" style="text-align:center">Sign in with Google to sync your progress across devices. You can also use the app without an account. The Google account chooser opens in your browser; Gmail app accounts may need to be signed in there once.</div><div class="d" style="text-align:center;margin-top:14px">Written by <b>CodeWithSiam</b> · Md Siam Ahmmed</div>`,
+const F=[`<div class="obh">${cover()}<h1>My Winter Arc</h1><div class="sub">My 90-Day Winter Challenge</div><div class="d">HSC 2027 · STUDY · BODY · MIND</div></div><button class="btn gg full" data-google="onboarding" ${googleBusy?'disabled':''}>${googleBusy?'Connecting…':'Continue with Google'}</button>${googleMessage?`<div class="note" role="status">${escapeHtml(googleMessage)}</div>`:''}<div class="or">or</div><button class="btn full" data-ob="1">Continue without an account</button><div class="note" style="text-align:center">Sign in with Google to sync your progress across devices. Your first Google sign-in creates an account automatically; use the same Google account on each device. You can also use the app without an account. The Google account chooser opens in your browser; Gmail app accounts may need to be signed in there once.</div><div class="d" style="text-align:center;margin-top:14px">Written by <b>CodeWithSiam</b> · Md Siam Ahmmed</div>`,
 `${dots}<h2>What should I call you?</h2><input type="text" id="on" placeholder="Your name" value="${escapeHTML(S.name||'')}"><button class="btn full" data-ob="1">Continue</button>`,
 `${dots}<h2>Your starting weight</h2><input type="number" id="ow" placeholder="Weight in kg" value="${escapeHTML(getp('mo.1.w0')||'')}"><div class="d">Target is 60 kg</div><button class="btn full" data-ob="1">Continue</button>`,
 `${dots}<h2>When is your HSC exam?</h2><input type="date" id="oh" value="${escapeHTML(S.hsc||'')}"><div class="d">Optional — it powers your countdown.</div><button class="btn full" data-ob="1">Continue</button>`,
@@ -851,8 +884,8 @@ let smb;function smLock(){$('smh2').textContent=S.smLim+' minutes are used';$('s
 $('smok').onclick=()=>{$('smx').classList.remove('s');clearInterval(smb)};
 setInterval(()=>{const s=smSync();if(s.run){if(smUsed()>=S.smLim*60){s.used=S.smLim*60;s.run=0;persist();drawSM();smLock()}else tickSM()}},1000);
 const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function accountCard(){const msg=cloudMessage?`<div class="d" role="status" style="color:var(--danger);margin-top:8px">${escapeHtml(cloudMessage)}</div>`:'';if(!auth)return `<h3>☁️ Firebase account</h3><div class="card"><div class="d">${escapeHtml(cloudMessage||'Cloud sync is not configured. Your data is saved on this device.')}</div></div>`;if(authUser)return `<h3>☁️ Firebase account</h3><div class="card"><div class="d">Signed in as <b>${escapeHtml(authUser.email||'Firebase user')}</b></div>${msg}<div class="row" style="justify-content:flex-start"><button class="btn g" data-auth="signout">Sign out</button></div></div>`;return `<h3>☁️ Firebase account</h3><div class="card"><div class="d">Sign in or create a free account to sync achievements and progress across devices. Your data also stays saved locally.</div><button class="btn gg full" data-google="settings" ${googleBusy?'disabled':''}>${googleBusy?'Connecting…':'Continue with Google'}</button>${googleMessage?`<div class="d" role="status">${escapeHtml(googleMessage)}</div>`:''}<input type="text" id="cloudEmail" placeholder="Email address" autocomplete="email"><input type="password" id="cloudPassword" placeholder="Password (at least 6 characters)" autocomplete="current-password">${msg}<div class="row" style="justify-content:flex-start"><button class="btn" data-auth="signup">Create account</button><button class="btn g" data-auth="signin">Sign in</button></div></div>`}
-async function accountAction(mode){if(!auth){cloudMessage='Firebase is not configured yet. Add the web app settings in firebase-config.js.';drawSet();return}try{cloudMessage='';if(mode==='signout'){if(ref){clearTimeout(tm);await ref.set({state:JSON.parse(JSON.stringify(S)),updatedAt:localChangedAt})}await auth.signOut();return}const email=$('cloudEmail').value.trim(),password=$('cloudPassword').value;if(!email||!password){cloudMessage='Enter your email address and password.';drawSet();return}authChoiceRequired=true;if(mode==='signup')await auth.createUserWithEmailAndPassword(email,password);else await auth.signInWithEmailAndPassword(email,password)}catch(e){authChoiceRequired=false;console.error('Firebase account action failed:',e);cloudMessage=e.message;drawSet()}}
+function accountCard(){const msg=cloudMessage?`<div class="d" role="status" style="color:var(--danger);margin-top:8px">${escapeHTML(cloudMessage)}</div>`:'';if(!auth)return `<h3>☁️ Firebase account</h3><div class="card"><div class="d">${escapeHTML(cloudMessage||'Cloud sync is not configured. Your data is saved on this device.')}</div></div>`;if(authUser)return `<h3>☁️ Firebase account</h3><div class="card"><div class="d">Signed in as <b>${escapeHTML(authUser.email||'Firebase user')}</b></div>${cloudSyncPaused?'<div class="d" style="margin-top:8px">Both copies are kept. Sign out and sign in again to choose which copy to sync.</div>':''}${msg}<div class="row" style="justify-content:flex-start"><button class="btn g" data-auth="signout">Sign out</button></div></div>`;return `<h3>☁️ Firebase account</h3><div class="card"><div class="d">Sign in or create a free account to sync achievements and progress across devices. Your data also stays saved locally. Your first Google sign-in creates your account automatically. Use the same Google account on each device.</div><button class="btn gg full" data-google="settings" ${googleBusy?'disabled':''}>${googleBusy?'Connecting…':'Continue with Google'}</button>${googleMessage?`<div class="d" role="status">${escapeHTML(googleMessage)}</div>`:''}<input type="text" id="cloudEmail" placeholder="Email address" autocomplete="email"><input type="password" id="cloudPassword" placeholder="Password (at least 6 characters)" autocomplete="current-password">${msg}<div class="row" style="justify-content:flex-start"><button class="btn" data-auth="signup">Create account</button><button class="btn g" data-auth="signin">Sign in</button></div></div>`}
+async function accountAction(mode){if(!auth){cloudMessage='Firebase is not configured yet. Add the web app settings in firebase-config.js.';drawSet();return}try{cloudMessage='';if(mode==='signout'){let syncWarning='';if(ref&&!cloudSyncPaused){clearTimeout(tm);const currentRef=ref;try{const snap=await currentRef.get(),remote=snap.exists?snap.data():null;if(remote&&remote.state&&Number(remote.updatedAt)>localChangedAt)applyCloudState(remote.state,remote.updatedAt);else if(!remote||localChangedAt>Number(remote.updatedAt||0))await currentRef.set({state:JSON.parse(JSON.stringify(S)),updatedAt:localChangedAt})}catch(error){console.error('Could not verify or sync the latest cloud save before sign-out:',error);syncWarning='Signed out with local data kept, but the latest cloud save could not be checked. Reconnect and sign in to sync safely.'}}await auth.signOut();if(syncWarning){cloudMessage=syncWarning;$('bd').textContent='⚠️ cloud save not checked';drawSet()}return}const email=$('cloudEmail').value.trim(),password=$('cloudPassword').value;if(!email||!password){cloudMessage='Enter your email address and password.';drawSet();return}authChoiceRequired=true;if(mode==='signup')await auth.createUserWithEmailAndPassword(email,password);else await auth.signInWithEmailAndPassword(email,password)}catch(e){authChoiceRequired=false;console.error('Firebase account action failed:',e);cloudMessage=e.message;drawSet()}}
 function drawSet(){if(!$('set').classList.contains('s'))return;$('setc').innerHTML=`<h3>Language</h3><div class="card lang-setting"><div class="lang-copy"><b>App language</b><div class="d">Choose your preferred app language.</div></div>${lang()}</div>${accountCard()}<h3>Cover photo</h3><div class="card" style="display:flex;gap:12px;align-items:center"><div class="cpv" style="${S.cover?'background-image:url('+S.cover+')':''}"></div><div class="d" style="flex:1">Shown behind your day counter on Home.</div><button class="btn g" data-cam="1">Choose</button>${S.cover?'<button class="btn g" data-camx="1">Reset</button>':''}</div><h3>Social media limit</h3><div class="card" style="display:flex;align-items:center;gap:10px"><div style="flex:1"><b>${S.smLim} min per day</b><div class="d">Your daily budget on the Home timer.</div></div><button class="btn g" data-lm="-5">−5</button><button class="btn g" data-lm="5">+5</button></div>${backupCard()}`}
 function drawHome(){drawHome0();drawSM();drawSet()}
 $('setx').onclick=()=>$('set').classList.remove('s');
@@ -862,7 +895,8 @@ if(t.closest('[data-set]')){$('set').classList.add('s');drawSet();loc($('set'))}
 else if(l){S.smLim=Math.max(5,Math.min(120,S.smLim+ +l.dataset.lm));persist();drawSM();drawSet()}
 else if(b){const a=b.dataset.sm;if(a=='start')smStart();else if(a=='stop')smStop();else{smSync().used+=300;persist();drawSM();if(smUsed()>=S.smLim*60)smLock()}}});
 Object.assign(BN,{'Language':'ভাষা','App language':'অ্যাপের ভাষা','Choose your preferred app language.':'অ্যাপের পছন্দের ভাষা বেছে নাও','Social media today':'আজকের social media','Start session':'Session শুরু করো','Stop timer':'Timer থামাও','+# min used elsewhere':'অন্য জায়গায় +# মিনিট গেছে','Limit reached':'Limit শেষ','Used # of # min':'ব্যবহার # / # মিনিট','Start the timer before you open a social app. It rings when your limit is up.':'Social app খোলার আগে timer চালাও। limit শেষ হলে বাজবে।','No more social media today. Come back tomorrow.':'আজ আর social media নয়। কাল আবার।','Start now':'এখনই শুরু করো','Settings':'সেটিংস','Cover photo':'Cover ছবি','Reset':'রিসেট','Close':'বন্ধ করো','Social media limit':'Social media limit','# min per day':'প্রতিদিন # মিনিট','Shown behind your day counter on Home.':'Home-এর day counter-এর পেছনে দেখা যাবে।','Time is up':'সময় শেষ','Done, I closed it':'বন্ধ করেছি','Custom countdown':'নিজের মতো countdown','Minutes':'মিনিট','Seconds':'সেকেন্ড','Start timer':'Timer শুরু করো','Cancel timer':'Timer বাতিল','Timer running':'Timer চলছে','Time is up.':'সময় শেষ।','Choose a duration from # second to # hours.':'# সেকেন্ড থেকে # ঘণ্টার সময় বেছে নাও।','Continue with Google':'Google দিয়ে চালিয়ে যাও','Continue without an account':'অ্যাকাউন্ট ছাড়া চালিয়ে যাও','Connecting…':'সংযোগ হচ্ছে…','Sign in with Google to sync your progress across devices. You can also use the app without an account.':'সব ডিভাইসে অগ্রগতি sync করতে Google দিয়ে sign in করো। অ্যাকাউন্ট ছাড়াও app ব্যবহার করতে পারো।'});
-BN['The Google account chooser opens in your browser; Gmail app accounts may need to be signed in there once.']='Google account বাছাই browser-এ খুলবে; Gmail app-এর account browser-এ একবার sign in করতে হতে পারে।';
+BN['Sign in with Google to sync your progress across devices. Your first Google sign-in creates an account automatically; use the same Google account on each device. You can also use the app without an account. The Google account chooser opens in your browser; Gmail app accounts may need to be signed in there once.']='সব device-এ progress sync করতে Google দিয়ে sign in করো। প্রথমবার Google দিয়ে sign in করলেই account তৈরি হবে; প্রতিটি device-এ একই Google account ব্যবহার করো। Account ছাড়াও app ব্যবহার করতে পারো। Google account বাছাই browser-এ খুলবে; Gmail app-এর account browser-এ একবার sign in করতে হতে পারে।';
+BN['Sign in or create a free account to sync achievements and progress across devices. Your data also stays saved locally. Your first Google sign-in creates your account automatically. Use the same Google account on each device.']='অর্জন ও অগ্রগতি সব device-এ sync করতে বিনামূল্যে sign in করো। Data এই device-এও save থাকবে। Google দিয়ে প্রথমবার sign in করলে account তৈরি হবে। প্রতিটি device-এ একই Google account ব্যবহার করো।';
 
 renderAll();$('add').style.display='none';ob();if(S.lang=='bn')loc(document.body);updateConnectionNotice();updateAlarmPlatformGuidance();setupNativeAlarms();if(countdown){if(countdown.dueAt<=Date.now())finishCountdown();else{renderCountdown();countdownTicker=setInterval(renderCountdown,1000)}}
 initFirebase();

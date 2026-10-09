@@ -38,6 +38,7 @@ await build({
 });
 const sound = generateAlarmSound();
 for (const [root, path] of [
+  ['www', 'www/winter_arc_alarm.wav'],
   ['android/app', 'android/app/src/main/res/raw/winter_arc_alarm.wav'],
   ['ios/App/App', 'ios/App/App/winter_arc_alarm.wav']
 ]) {
