@@ -1,8 +1,9 @@
-const CACHE_NAME = 'winter-arc-shell-v2';
+const CACHE_NAME = 'winter-arc-shell-v9';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './offline.html',
   './icon.svg',
   './icon-192.png',
   './icon-512.png',
@@ -10,6 +11,7 @@ const APP_SHELL = [
   './native-auth-config.js',
   './native-plugins.js'
 ];
+const STATIC_URLS = new Set(APP_SHELL.map(path => new URL(path, self.registration.scope).href));
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -22,7 +24,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
+      .then(keys => Promise.all(keys.filter(key => key.startsWith('winter-arc-shell-') && key !== CACHE_NAME).map(key => caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
@@ -33,22 +35,26 @@ self.addEventListener('fetch', event => {
 
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).then(response => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put('./index.html', copy));
-        return response;
-      }).catch(() => caches.match('./index.html'))
+      fetch(request).catch(async () => {
+        const cache = await caches.open(CACHE_NAME);
+        const url = new URL(request.url);
+        const appRoot = new URL(self.registration.scope);
+        const isAppShell = url.pathname === appRoot.pathname || url.pathname === new URL('./index.html', appRoot).pathname;
+        return await cache.match(isAppShell ? './index.html' : './offline.html')
+          || await cache.match('./offline.html');
+      })
     );
     return;
   }
 
-  event.respondWith(
-    caches.match(request).then(cached => cached || fetch(request).then(response => {
-      if (response.ok) {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
-      }
-      return response;
-    }))
-  );
+  if (!STATIC_URLS.has(request.url)) return;
+
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    const cached = await cache.match(request);
+    if (cached) return cached;
+    const response = await fetch(request);
+    if (response.ok) await cache.put(request, response.clone());
+    return response;
+  })());
 });

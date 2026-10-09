@@ -5,9 +5,12 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Winter Arc">
+<meta name="mobile-web-app-capable" content="yes">
 <title>My Winter Arc</title>
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="icon" href="./icon-192.png" sizes="192x192" type="image/png">
+<link rel="icon" href="./icon-512.png" sizes="512x512" type="image/png">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Hind+Siliguri:wght@400;500;600&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
 <style>
@@ -155,13 +158,51 @@ nav svg{width:22px;height:22px;display:block;margin:0 auto 2px;stroke:currentCol
 #planContent[contenteditable="true"]{outline:1px dashed var(--on);outline-offset:3px;border-radius:8px}
 .weeks-tools{display:flex;justify-content:flex-end;gap:8px;position:sticky;top:0;z-index:2;padding:6px 0;background:var(--bg)}
 #weeksContent[contenteditable="true"]{outline:1px dashed var(--on);outline-offset:3px;border-radius:8px}
-.timer-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px}.timer-presets{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.timer-presets button{border:1px solid var(--line);border-radius:18px;padding:6px 12px;background:var(--row);color:var(--mut)}.timer-status{min-height:20px;margin-top:8px}
+.timer-inputs{display:grid;grid-template-columns:1fr 1fr;gap:8px}.timer-presets{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.timer-presets button{border:1px solid var(--line);border-radius:18px;padding:6px 12px;background:var(--row);color:var(--mut)}.timer-actions{flex-wrap:wrap}.timer-status{min-height:20px;margin-top:8px}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+<style>
+@supports not (color:color-mix(in srgb,black,white)){
+:root{--g1:#344638;--g2:#4d7552;--g3:#6caa73;--tx-10:rgba(241,241,242,.10);--tx-15:rgba(241,241,242,.15);--tx-20:rgba(241,241,242,.20);--tx-33:rgba(241,241,242,.33);--tx-50:rgba(241,241,242,.50);--tx-60:rgba(241,241,242,.60);--tx-soft:rgba(241,241,242,.26);--gold-soft:rgba(232,193,106,.26);--danger-soft:rgba(239,114,114,.34);--on-soft:rgba(139,207,145,.16);--bg-soft:rgba(14,14,16,.72)}
+}
 </style></head><body>
 <div id="splash"><div class="sp"><svg viewBox="0 0 200 120" width="200"><path class="sm1" d="M20 110L80 40L140 110Z" fill="var(--on)"/><path class="sm2" d="M80 110L135 22L190 110Z" fill="var(--on)"/><path class="sm2" d="M122 40L135 22L148 42L141 38L135 46L129 38Z" fill="var(--tx)"/><path d="M0 110Q60 98 100 106T200 104V120H0Z" fill="var(--bg)"/></svg><h1>My Winter Arc</h1><p>Quiet winter. Loud results.</p><div class="ld"><i></i></div><small>CODEWITHSIAM</small></div></div>
 <div class="badge" id="bd">💾 local</div>
 <div class="w a" id="p0"></div>
-<div class="w alarm-page" id="p1"><h1>⏰ Alarms</h1><div class="sub">Native notifications can ring while the app is closed. Tap an alert to open the full alarm screen.</div><div id="alarmNotice"></div><section class="card" aria-labelledby="timerHeading"><b id="timerHeading">Custom countdown</b><div class="d">Choose any duration. Native apps can notify you in the background when notifications are enabled.</div><div class="timer-inputs"><label><span class="d">Minutes</span><input id="timerMinutes" type="number" inputmode="numeric" min="0" max="1439" value="4" aria-label="Timer minutes"></label><label><span class="d">Seconds</span><input id="timerSeconds" type="number" inputmode="numeric" min="0" max="59" value="0" aria-label="Timer seconds"></label></div><div class="timer-presets"><button type="button" data-timer-preset="60">1 min</button><button type="button" data-timer-preset="240">4 min</button><button type="button" data-timer-preset="300">5 min</button><button type="button" data-timer-preset="600">10 min</button><button type="button" data-timer-preset="1500">25 min</button></div><div class="row" style="justify-content:flex-start"><button type="button" class="btn" id="timerStart">Start timer</button><button type="button" class="btn g" id="timerCancel" hidden>Cancel timer</button></div><div id="timerStatus" class="d timer-status" role="status" aria-live="polite"></div></section><button class="tst" id="test"><span class="ti">🔔</span><span><b>Test alarm</b><small>Rings in 5 seconds</small></span><span class="go">▶</span></button><div class="alarm-topics" id="alarmTopics" role="group" aria-label="Filter alarms by topic"></div><div id="list"></div></div>
+<div class="w alarm-page" id="p1">
+ <h1>⏰ Alarms</h1>
+ <div class="sub" id="alarmPlatformNote">Alarm delivery depends on your device and app installation.</div>
+ <div id="alarmNotice"></div>
+ <section class="card" aria-labelledby="timerHeading">
+  <b id="timerHeading">Custom countdown</b>
+  <div class="d" id="timerPlatformNote">Choose any duration for your countdown.</div>
+  <div class="timer-inputs">
+   <label><span class="d">Minutes</span><input id="timerMinutes" type="number" inputmode="numeric" min="0" max="1439" value="4" aria-label="Timer minutes"></label>
+   <label><span class="d">Seconds</span><input id="timerSeconds" type="number" inputmode="numeric" min="0" max="59" value="0" aria-label="Timer seconds"></label>
+  </div>
+  <div class="timer-presets">
+   <button type="button" data-timer-preset="60">1 min</button><button type="button" data-timer-preset="240">4 min</button><button type="button" data-timer-preset="300">5 min</button><button type="button" data-timer-preset="600">10 min</button><button type="button" data-timer-preset="1500">25 min</button>
+  </div>
+  <label class="d" for="alarmSound">Alarm sound</label>
+  <select id="alarmSound" class="alarm-topic-select">
+   <option value="digital">Digital</option><option value="chime">Chime</option><option value="sunrise">Sunrise</option><option value="zen">Zen Bowl</option><option value="siren">Siren</option>
+  </select>
+  <div class="row timer-actions" style="justify-content:flex-start">
+   <button type="button" class="btn" id="timerStart">Start timer</button>
+   <button type="button" class="btn g" id="timerAddAlarm">Add as regular alarm</button>
+   <button type="button" class="btn g" id="timerCancel" hidden>Cancel timer</button>
+  </div>
+  <div class="row timer-actions" style="justify-content:flex-start">
+   <button type="button" class="btn g" id="testAlarmSound">Test sound</button>
+   <button type="button" class="btn g" id="stopAlarmSound" disabled>Stop sound</button>
+  </div>
+  <div class="d" id="alarmSoundStatus" role="status" aria-live="polite"></div>
+  <div class="d" id="timerAddAlarmHelp">Add the selected duration as a clock alarm; choose repeat days in the next screen. Without repeat days, it rings once.</div>
+  <div id="timerStatus" class="d timer-status" role="status" aria-live="polite"></div>
+ </section>
+ <button class="tst" id="test"><span class="ti">🔔</span><span><b>Test alarm</b><small>Rings in 5 seconds</small></span><span class="go">▶</span></button>
+ <div class="alarm-topics" id="alarmTopics" role="group" aria-label="Filter alarms by topic"></div><div id="list"></div>
+</div>
 <div class="w" id="p2"></div><div class="w" id="p3"></div><div class="w" id="p4"></div>
 <button class="btn fab" id="add">+</button>
 <nav><button class="a" data-p="0"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Home</span></button><button data-p="1"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M5 3L2 6M19 3l3 3"/></svg><span>Alarms</span></button><button data-p="2"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg><span>90-Day Arc</span></button><button data-p="3"><svg viewBox="0 0 24 24"><path d="M5 4h12a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2zM9 8h6M9 12h6"/></svg><span>Weeks</span></button><button data-p="4"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19V5"/></svg><span>Plan</span></button></nav>
@@ -187,7 +228,7 @@ const DEF=[[1,'Fajr + water + fresh start',5,30,ALL],[2,'Weigh-in (empty stomach
 const HB=['Wake on time','Self-study 6h','Online class done','Tuition 1.5h','Gym (Fri off)','Protein-rich food','Water target','5x Salah','Phone-free focus','Revision 30 min','Sleep 7.5h','Mistake Notebook'];
 const $=id=>document.getElementById(id),p2=n=>String(n).padStart(2,'0'),fmt=i=>(i.h%12||12)+':'+p2(i.m)+' '+(i.h<12?'AM':'PM');
 const dS=()=>({items:DEF.map(i=>({...i,days:[...i.days]})),cover:'',ach:{},blk:{},achInit:0,name:'',lang:'en',smLim:30,sm:{d:'',used:0,run:0},ob:0,hsc:'',start:null,sel:0,why:'',rule:'',log:{},score:{},mo:{},wk:{},road:{},planHtml:null,weeksHtml:null,lastBackup:''});
-let S=dS(),sounds={},ref=null,tm=null,auth=null,db=null,authUser=null,cloudMessage='',authChoiceRequired=false,localChangedAt=0,cloudUnsubscribe=null,hasLocalTimestamp=false,socialLoginReady=null,googleBusy=false,googleMessage='';
+let S=dS(),sounds={},ref=null,tm=null,auth=null,db=null,authUser=null,cloudMessage='',authChoiceRequired=false,localChangedAt=0,cloudUnsubscribe=null,hasLocalTimestamp=false,socialLoginReady=null,googleBusy=false,googleMessage='',firebaseReady=false,firebaseLoadPromise=null;
 let hasLocalData=false;
 const FORBIDDEN_KEYS=new Set(['__proto__','prototype','constructor']);
 function cloneSafeData(value,depth=0,budget={nodes:0}){
@@ -240,7 +281,7 @@ function sanitizeState(input){
 try{const saved=localStorage.getItem('wa2');hasLocalData=!!saved;if(saved){if(saved.length>2*1024*1024)throw new Error('Saved data exceeds the 2 MB safety limit.');S=sanitizeState(JSON.parse(saved))}const timestamp=localStorage.getItem('wa2-updated-at');hasLocalTimestamp=timestamp!==null;localChangedAt=Number(timestamp)||0}catch(e){console.error('Could not safely load saved Winter Arc data:',e);cloudMessage='Saved data could not be read safely. Restore a valid backup or clear this device’s saved app data.'}
 S.items=(Array.isArray(S.items)?S.items:DEF).map(i=>({...i,topic:Number.isInteger(i.topic)&&i.topic>=0&&i.topic<ATOP.length?i.topic:defaultAlarmTopic(i.id),msg:typeof i.msg==='string'?i.msg:''}));
 function storeLocal(){try{localStorage.setItem('wa2',JSON.stringify(S));localStorage.setItem('wa2-updated-at',String(localChangedAt));hasLocalData=true;hasLocalTimestamp=true;return true}catch(e){console.error('Could not save Winter Arc data locally:',e);$('bd').textContent='⚠️ local save failed';cloudMessage='Local save failed: '+e.message;return false}}
-function persist(){localChangedAt=Math.max(Date.now(),localChangedAt+1);const saved=storeLocal();if(!saved)return;if(!ref){$('bd').textContent=authUser?'☁️ waiting for sync':'💾 local';return}clearTimeout(tm);tm=setTimeout(()=>{const changedAt=localChangedAt;ref.set({state:JSON.parse(JSON.stringify(S)),updatedAt:changedAt}).then(()=>{if(changedAt===localChangedAt)$('bd').textContent='☁️ saved'}).catch(e=>{console.error('Could not sync Winter Arc data to Firebase:',e);cloudMessage='Cloud save failed: '+e.message;$('bd').textContent='⚠️ cloud save failed';drawSet()})},700)}
+function persist(){localChangedAt=Math.max(Date.now(),localChangedAt+1);const saved=storeLocal();if(!saved)return;if(!ref){$('bd').textContent=navigator.onLine===false?'💾 local · offline':authUser?'☁️ waiting for sync':'💾 local';return}clearTimeout(tm);tm=setTimeout(()=>{const changedAt=localChangedAt;ref.set({state:JSON.parse(JSON.stringify(S)),updatedAt:changedAt}).then(()=>{if(changedAt===localChangedAt)$('bd').textContent='☁️ saved'}).catch(e=>{console.error('Could not sync Winter Arc data to Firebase:',e);cloudMessage='Cloud save failed: '+e.message;$('bd').textContent='⚠️ cloud save failed';drawSet()})},700)}
 const getp=p=>p.split('.').reduce((o,k)=>o==null?o:o[k],S);
 function setp(p,v){const a=p.split('.');let o=S;for(let i=0;i<a.length-1;i++)o=o[a[i]]=o[a[i]]||{};o[a[a.length-1]]=v;persist()}
 function applyCloudState(state,updatedAt){S=sanitizeState(state);localChangedAt=Number(updatedAt)||Date.now();storeLocal();renderAll();ob();if(S.lang=='bn')loc(document.body);syncNativeAlarms(true)}
@@ -273,12 +314,39 @@ function initFirebase(){
   const config=window.FIREBASE_CONFIG;
   if(!config||!config.apiKey||!config.projectId){cloudMessage='Add your Firebase web app settings to firebase-config.js to enable cloud sync.';return}
   if(!window.firebase){cloudMessage='Firebase could not load. Check your internet connection and try again.';return}
+  if(firebaseReady)return;
   try{
-    firebase.initializeApp(config);auth=firebase.auth();db=firebase.firestore();
+    if(!firebase.apps.length)firebase.initializeApp(config);auth=firebase.auth();db=firebase.firestore();firebaseReady=true;
     auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(e=>{console.error('Could not enable persistent Firebase sign-in:',e);cloudMessage='Sign-in persistence is unavailable: '+e.message;drawSet()});
     auth.onAuthStateChanged(user=>connectCloud(user),e=>{console.error('Firebase authentication state failed:',e);cloudMessage='Authentication failed: '+e.message;drawSet()});
   }catch(e){console.error('Could not initialize Firebase:',e);cloudMessage='Firebase setup failed: '+e.message}
 }
+function loadFirebaseOnReconnect(){
+ if(firebaseReady||firebaseLoadPromise)return firebaseLoadPromise;
+ const loadScript=src=>new Promise((resolve,reject)=>{const script=document.createElement('script');script.src=src;script.onload=resolve;script.onerror=()=>reject(new Error('Could not load Firebase cloud support. Check your connection and try again.'));document.head.appendChild(script)});
+ firebaseLoadPromise=(async()=>{if(!window.firebase)await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js');if(!window.firebase.auth)await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js');if(!window.firebase.firestore)await loadScript('https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js');initFirebase()})().catch(e=>{console.error('Could not load Firebase after reconnecting:',e);cloudMessage=e.message;drawSet()}).finally(()=>{firebaseLoadPromise=null});
+ return firebaseLoadPromise;
+}
+function updateConnectionNotice(){
+ const offline=typeof navigator!=='undefined'&&navigator.onLine===false;
+ if(offline&&!authUser)$('bd').textContent='💾 local · offline';
+ else if(!authUser)$('bd').textContent='💾 local';
+}
+function updateAlarmPlatformGuidance(){
+ const native=nativePlatform();
+ $('alarmPlatformNote').textContent=native
+  ?'Native alarm alerts require notification permission. Test them on this device before relying on them.'
+  :'This web app cannot reliably ring when the iPhone is locked, Safari is backgrounded, or the app is closed. Use the iPhone Clock app for dependable alarms.';
+ $('timerPlatformNote').textContent=native
+  ?'Choose a duration. A background notification can be scheduled when notification permission is enabled.'
+  :'A countdown here only works while the page is active; iOS may pause it when the screen locks or you leave Safari. Use Clock for alarms while the phone is locked.';
+ loc($('alarmPlatformNote'));loc($('timerPlatformNote'));
+}
+window.addEventListener('offline',updateConnectionNotice);
+window.addEventListener('online',()=>{
+ updateConnectionNotice();
+ if(authUser)connectCloud(authUser);else if(!firebaseReady&&window.FIREBASE_CONFIG&&window.FIREBASE_CONFIG.apiKey&&window.FIREBASE_CONFIG.projectId)loadFirebaseOnReconnect();
+});
 async function initializeNativeGoogleSignIn(){
   const plugin=window.WinterArcNative&&window.WinterArcNative.SocialLogin,config=window.WINTERARC_NATIVE_AUTH_CONFIG||{},platform=window.WinterArcNative&&window.WinterArcNative.Capacitor.getPlatform();
   if(!plugin)throw new Error('Native Google sign-in is unavailable. Rebuild the mobile app after syncing dependencies.');
@@ -305,6 +373,7 @@ async function signInWithGoogle(fromOnboarding=false){
     }else{
       const provider=new firebase.auth.GoogleAuthProvider();
       provider.addScope('email');provider.addScope('profile');
+      provider.setCustomParameters({prompt:'select_account'});
       await auth.signInWithPopup(provider);
     }
     googleMessage='';
@@ -371,7 +440,7 @@ async function startCountdown(){
        showCountdownStatus(`Timer running · ${countdownText(dueAt-Date.now())} · background notification scheduled`);
      }else showCountdownStatus('Timer running, but notifications are off. Enable alarm notifications if it must alert in the background.');
    }catch(e){console.error('Could not schedule the countdown notification:',e);showCountdownStatus('Timer is running in the app, but background notification could not be scheduled: '+e.message)}
- }else showCountdownStatus('Timer running. Keep this page open; browsers cannot guarantee an alarm after the page closes.');
+ }else showCountdownStatus('Timer running. Keep this page active; iOS may pause it when the screen locks or you leave Safari. Use Clock for a dependable locked-screen alarm.');
  if(!countdownTicker)countdownTicker=setInterval(renderCountdown,1000);
 }
 async function cancelCountdown(){
@@ -379,7 +448,15 @@ async function cancelCountdown(){
  const id=countdown.notificationId;countdown=null;clearSavedCountdown();renderCountdown();showCountdownStatus('Timer cancelled.');
  if(id&&nativePlatform()&&localNotifications())try{await localNotifications().cancel({notifications:[{id}]})}catch(e){console.error('Could not cancel countdown notification:',e);showCountdownStatus('Timer cancelled in the app, but its notification could not be cancelled: '+e.message)}
 }
-$('timerStart').onclick=()=>{if(!nativePlatform())prepareAlarmAudio();startCountdown()};$('timerCancel').onclick=cancelCountdown;
+function addCountdownAsAlarm(){
+ const minutes=Number($('timerMinutes').value),seconds=Number($('timerSeconds').value);
+ if(!Number.isInteger(minutes)||minutes<0||minutes>1439||!Number.isInteger(seconds)||seconds<0||seconds>59||(minutes===0&&seconds===0)){showCountdownStatus('Choose a duration from 1 second to 24 hours.');return}
+ const dueAt=countdown?countdown.dueAt:Date.now()+(minutes*60+seconds)*1000;
+ const target=new Date(Math.ceil(dueAt/60000)*60000);
+ let id=Date.now();while(S.items.some(item=>item.id===id))id++;
+ edit({id,label:'Custom countdown',h:target.getHours(),m:target.getMinutes(),days:[],on:true,topic:2,msg:'Your saved countdown alarm is ready.',_n:1});
+}
+$('timerStart').onclick=()=>{unlockAudio().catch(error=>console.error('Could not unlock audio for the countdown:',error));startCountdown()};$('timerCancel').onclick=cancelCountdown;$('timerAddAlarm').onclick=addCountdownAsAlarm;
 document.querySelectorAll('[data-timer-preset]').forEach(button=>button.onclick=()=>{const total=+button.dataset.timerPreset;$('timerMinutes').value=Math.floor(total/60);$('timerSeconds').value=total%60});
 function handleNativeAlarm(notification){
  const extra=notification&&notification.extra;
@@ -395,14 +472,80 @@ function edit(i){editing=i||{id:Date.now()%1e7+100,label:'',h:6,m:0,days:[],on:t
 $('add').onclick=()=>edit();$('ecan').onclick=()=>$('ed').classList.remove('s');
 $('edel').onclick=()=>{S.items=S.items.filter(x=>x.id!=editing.id);persist();drawA();$('ed').classList.remove('s');syncNativeAlarms(true)};
 $('esv').onclick=()=>{const[a,b]=$('et').value.split(':').map(Number);editing.label=$('el').value.trim()||'Alarm';editing.h=a;editing.m=b;editing.topic=+$('etopic').value;editing.msg=$('emsg').value.trim();editing.days=[...$('ec').querySelectorAll('input:checked')].map(x=>+x.value);if(editing.days.length){delete editing.onceAt}else{const at=new Date();at.setHours(a,b,0,0);if(at<=new Date())at.setDate(at.getDate()+1);editing.onceAt=at.toISOString()}const f=$('ef').files[0];if(f)sounds[editing.id]=URL.createObjectURL(f);if(editing._n){delete editing._n;S.items.push(editing)}expandedAlarmId=editing.id;persist();drawA();$('ed').classList.remove('s');syncNativeAlarms(true)};
-let ac,bt,cur,snd,fired={};function prepareAlarmAudio(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext);if(ac.state==='suspended')ac.resume().catch(e=>console.error('Could not enable alarm audio:',e))}catch(e){console.error('Could not prepare alarm audio:',e)}}document.addEventListener('pointerdown',prepareAlarmAudio,{once:true});document.addEventListener('keydown',prepareAlarmAudio,{once:true});function beep(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=880;g.gain.value=.3;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.3)}catch(e){console.error('Could not play alarm sound:',e);if(cur&&cur.id===-2)showCountdownStatus('Time is up, but browser audio could not start. Enable sound and keep this page open.')}}
+let ac,bt,cur,snd,fired={},alarmLoopTimer=null,alarmGeneration=0,activeAlarmNodes=new Set();
+const TIMER_SOUND_KEY='wa2-alarm-sound',ALARM_SOUNDS=new Set(['digital','chime','sunrise','zen','siren']);
+function readAlarmSound(){try{const saved=localStorage.getItem(TIMER_SOUND_KEY);return ALARM_SOUNDS.has(saved)?saved:'digital'}catch(e){console.error('Could not read the saved alarm sound:',e);return'digital'}}
+let selectedAlarmSound=readAlarmSound();
+function updateAlarmSoundStatus(text){$('alarmSoundStatus').textContent=text}
+function unlockAudio(){
+ try{
+  const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+  if(!AudioContextClass)throw new Error('Web Audio is unavailable in this browser.');
+  ac=ac||new AudioContextClass();
+  const source=ac.createBufferSource(),buffer=ac.createBuffer(1,1,ac.sampleRate),gain=ac.createGain();
+  gain.gain.value=0;source.buffer=buffer;source.connect(gain);gain.connect(ac.destination);source.start();source.stop(ac.currentTime+.01);
+  return ac.state==='suspended'?ac.resume():Promise.resolve();
+ }catch(error){console.error('Could not unlock alarm audio:',error);updateAlarmSoundStatus('Could not enable audio: '+error.message);return Promise.reject(error)}
+}
+function prepareAlarmAudio(){unlockAudio().catch(error=>console.error('Could not prepare alarm audio:',error))}
+document.addEventListener('pointerdown',prepareAlarmAudio,{once:true});document.addEventListener('keydown',prepareAlarmAudio,{once:true});
+function setAlarmSound(value){
+ if(!ALARM_SOUNDS.has(value))return;
+ selectedAlarmSound=value;
+ try{localStorage.setItem(TIMER_SOUND_KEY,value);updateAlarmSoundStatus(`${value==='zen'?'Zen Bowl':value[0].toUpperCase()+value.slice(1)} sound selected.`)}
+ catch(error){console.error('Could not save the selected alarm sound:',error);updateAlarmSoundStatus('Sound selected for this session, but could not be saved: '+error.message)}
+}
+function playAlarmTone(context,frequency,duration,{start=0,endFrequency=null,type='sine',volume=.22,attack=.025}={}){
+ const when=context.currentTime+start,oscillator=context.createOscillator(),gain=context.createGain();
+ oscillator.type=type;oscillator.frequency.setValueAtTime(frequency,when);
+ if(endFrequency!==null)oscillator.frequency.linearRampToValueAtTime(endFrequency,when+duration);
+ gain.gain.setValueAtTime(.0001,when);gain.gain.exponentialRampToValueAtTime(volume,when+attack);
+ gain.gain.setValueAtTime(volume,when+duration*.62);gain.gain.exponentialRampToValueAtTime(.0001,when+duration);
+ oscillator.connect(gain);gain.connect(context.destination);activeAlarmNodes.add(oscillator);
+ oscillator.onended=()=>{activeAlarmNodes.delete(oscillator);oscillator.disconnect();gain.disconnect()};
+ oscillator.start(when);oscillator.stop(when+duration+.02);
+}
+function playAlarmPattern(name){
+ if(!ac||ac.state!=='running')return;
+ const patterns={
+  digital:{repeat:1050,notes:[[880,0,.13],[880,.24,.13],[1174,.66,.19]]},
+  chime:{repeat:1450,notes:[[659,.0,.6],[784,.18,.7],[988,.36,.82],[1175,.54,.9]]},
+  sunrise:{repeat:1650,notes:[[523,.0,.42],[659,.22,.52],[784,.45,.62],[1046,.69,.78]]},
+  zen:{repeat:1850,notes:[[196,.0,1.2],[293.66,.04,1.28],[392,.1,1.35]]},
+  siren:{repeat:1020,notes:[[650,.0,.47],[1100,.5,.47]]}
+ };
+ const pattern=patterns[name]||patterns.digital;
+ pattern.notes.forEach(([frequency,start,duration],index)=>{
+  const options=name==='siren'?{start,endFrequency:index===0?1100:650,type:'triangle',volume:.2}:{start,volume:name==='zen'?.14:.22,type:name==='digital'?'square':'sine'};
+  playAlarmTone(ac,frequency,duration,options);
+ });
+}
+function stopAlarm(){
+ alarmGeneration++;if(alarmLoopTimer){clearInterval(alarmLoopTimer);alarmLoopTimer=null}
+ for(const oscillator of activeAlarmNodes){try{oscillator.stop()}catch(error){console.error('Could not stop an alarm tone:',error)}}
+ activeAlarmNodes.clear();$('stopAlarmSound').disabled=true;
+}
+function startAlarm(soundName=selectedAlarmSound){
+ const name=ALARM_SOUNDS.has(soundName)?soundName:selectedAlarmSound;
+ $('alarmSound').value=name;setAlarmSound(name);stopAlarm();
+ const generation=alarmGeneration;
+ unlockAudio().then(()=>{
+  if(generation!==alarmGeneration)return;
+  playAlarmPattern(name);alarmLoopTimer=setInterval(()=>playAlarmPattern(name),({digital:1050,chime:1450,sunrise:1650,zen:1850,siren:1020}[name]));
+  $('stopAlarmSound').disabled=false;updateAlarmSoundStatus(`${name==='zen'?'Zen Bowl':name[0].toUpperCase()+name.slice(1)} sound playing. Press Stop sound to stop it.`);
+ }).catch(error=>{console.error('Could not start the selected alarm sound:',error);updateAlarmSoundStatus('Could not play alarm sound: '+error.message)});
+}
+function beep(){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=880;g.gain.value=.3;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.3)}catch(e){console.error('Could not play alarm sound:',e);if(cur&&cur.id===-2)showCountdownStatus('Time is up, but browser audio could not start. Enable sound and keep this page open.')}}
+$('alarmSound').value=selectedAlarmSound;$('alarmSound').onchange=event=>setAlarmSound(event.target.value);
+$('testAlarmSound').onclick=()=>startAlarm($('alarmSound').value);
+$('stopAlarmSound').onclick=()=>{stopAlarm();updateAlarmSoundStatus('Alarm sound stopped.');if(cur&&cur.id===-2&&$('ring').classList.contains('s'))stop()};
 let rctx={};
-function ring(i){if(bt)clearInterval(bt);if(snd){snd.pause();snd=null}cur=i;const td=sched(),n=new Date(),mi=n.getHours()*60+n.getMinutes(),ix=td.findIndex(x=>x.id==i.id);rctx=i.id===-2?{}:ix>=0?{p:td[ix-1],n:td[ix+1]}:{p:[...td].reverse().find(x=>x.h*60+x.m<=mi),n:td.find(x=>x.h*60+x.m>mi)};
-rctx.m=mi;rctx.now=fmt({h:n.getHours(),m:n.getMinutes()});$('rt').textContent=i.label;$('rd').textContent=i.msg||DET[i.id]||'';$('rtm').textContent=fmt({h:n.getHours(),m:n.getMinutes()});$('rq').textContent=MSG[Math.floor(Math.random()*MSG.length)];pv();$('ring').classList.add('s');if(navigator.vibrate)navigator.vibrate([400,200,400]);if(sounds[i.id]){snd=new Audio(sounds[i.id]);snd.loop=true;snd.play().catch(()=>{})}else{beep();bt=setInterval(beep,700)}}
+function ring(i){if(bt)clearInterval(bt);if(snd){snd.pause();snd=null}stopAlarm();cur=i;const td=sched(),n=new Date(),mi=n.getHours()*60+n.getMinutes(),ix=td.findIndex(x=>x.id==i.id);rctx=i.id===-2?{}:ix>=0?{p:td[ix-1],n:td[ix+1]}:{p:[...td].reverse().find(x=>x.h*60+x.m<=mi),n:td.find(x=>x.h*60+x.m>mi)};
+rctx.m=mi;rctx.now=fmt({h:n.getHours(),m:n.getMinutes()});$('rt').textContent=i.label;$('rd').textContent=i.msg||DET[i.id]||'';$('rtm').textContent=fmt({h:n.getHours(),m:n.getMinutes()});$('rq').textContent=MSG[Math.floor(Math.random()*MSG.length)];pv();$('ring').classList.add('s');if(navigator.vibrate)navigator.vibrate([400,200,400]);if(i.id===-2&&!nativePlatform())startAlarm(selectedAlarmSound);else if(sounds[i.id]){snd=new Audio(sounds[i.id]);snd.loop=true;snd.play().catch(e=>console.error('Could not play the alarm audio file:',e))}else{beep();bt=setInterval(beep,700)}}
 function pv(){const p=rctx.p,n=rctx.n,b=S.blk[dayNo()]||{};let ev='';if(n){const x=n.h*60+n.m-rctx.m;ev=x>=60?Math.floor(x/60)+' h '+x%60+' min':x+' min'}
 $('pv').innerHTML=p?`<div class="k">Time's up · ${fmt(p)} → ${rctx.now}</div><div class="t2">${escapeHTML(p.label)}</div>${b[p.id]?'<div class="chk"><span class="bx2"></span><b>Completed ✓</b></div>':`<div class="d2">Did you finish it?</div><div class="yn"><button class="y" data-bd="${p.id}">✓ Yes, done</button><button data-no="1">Not yet</button></div>`}`:'';
 $('nxb').innerHTML=n?`<div class="k">After this · ${fmt(n)} · in ${ev}</div><div class="t2">${escapeHTML(n.label)}</div><div class="d2">${escapeHTML(DET[n.id]||'')}</div>`:''}
-function stop(){ $('ring').classList.remove('s');clearInterval(bt);if(snd){snd.pause();snd=null}if(currentNotificationId&&localNotifications())localNotifications().removeDeliveredNotifications({notifications:[{id:currentNotificationId}]}).catch(e=>console.error('Could not dismiss alarm notification:',e));currentNotificationId=null}
+function stop(){ $('ring').classList.remove('s');stopAlarm();clearInterval(bt);if(snd){snd.pause();snd=null}if(currentNotificationId&&localNotifications())localNotifications().removeDeliveredNotifications({notifications:[{id:currentNotificationId}]}).catch(e=>console.error('Could not dismiss alarm notification:',e));currentNotificationId=null}
 async function snooze(){const i=cur;stop();if(nativeAlarmReady){try{const at=new Date(Date.now()+300000);await localNotifications().schedule({notifications:[{id:notificationId('snooze',i,at),title:'My Winter Arc · '+i.label,body:'Your 5-minute snooze is over. Tap to open alarm controls.',schedule:{at},extra:{kind:'winter-arc-snooze',alarm:{...i},scheduledAt:at.toISOString()}}]});return}catch(e){console.error('Could not schedule alarm snooze:',e);setNativeAlarmStatus('Snooze could not be scheduled: '+e.message)}}setTimeout(()=>ring(i),3e5)}
 $('stp').onclick=stop;$('snz').onclick=snooze;$('cnt').onclick=()=>{stop();document.querySelector('nav button[data-p="0"]').click()};$('test').onclick=()=>{prepareAlarmAudio();beep();setTimeout(()=>ring({id:-1,label:'Test alarm'}),5000)};
 setInterval(()=>{if(nativeAlarmReady)return;const n=new Date(),k=n.getFullYear()+'-'+n.getMonth()+'-'+n.getDate()+'-'+n.getHours()+'-'+n.getMinutes();S.items.forEach(i=>{const once=i.on&&!i.days.length&&i.onceAt&&Date.now()>=new Date(i.onceAt).getTime(),repeat=i.on&&i.days.includes(n.getDay()||7)&&i.h==n.getHours()&&i.m==n.getMinutes();if((once||repeat)&&fired[i.id]!=k){fired[i.id]=k;if(once){i.on=false;persist();drawA()}ring(i)}})},1000);
@@ -603,7 +746,7 @@ return `<div class="ghw"><div class="gh" style="grid-template-columns:repeat(${c
 function confetti(){if(navigator.vibrate)navigator.vibrate(120);const c=['var(--on)','var(--gold)','var(--on)','var(--on)'];for(let i=0;i<42;i++){const e=document.createElement('i');e.className='cf';e.style.left=Math.random()*100+'vw';e.style.background=c[i%4];e.style.animationDelay=Math.random()*.5+'s';document.body.appendChild(e);setTimeout(()=>e.remove(),3200)}}
 let obs=0;
 function ob(){const el=$('ob');if(S.ob){el.classList.remove('s');return}el.classList.add('s');const dots=`<div class="dots">${[1,2,3,4].map(i=>`<i class="${i==obs?'on':''}"></i>`).join('')}</div>`;
-const F=[`<div class="obh">${cover()}<h1>My Winter Arc</h1><div class="sub">My 90-Day Winter Challenge</div><div class="d">HSC 2027 · STUDY · BODY · MIND</div></div><button class="btn gg full" data-google="onboarding" ${googleBusy?'disabled':''}>${googleBusy?'Connecting…':'Continue with Google'}</button>${googleMessage?`<div class="note" role="status">${escapeHtml(googleMessage)}</div>`:''}<div class="or">or</div><button class="btn full" data-ob="1">Continue without an account</button><div class="note" style="text-align:center">Sign in with Google to sync your progress across devices. You can also use the app without an account.</div><div class="d" style="text-align:center;margin-top:14px">Written by <b>CodeWithSiam</b> · Md Siam Ahmmed</div>`,
+const F=[`<div class="obh">${cover()}<h1>My Winter Arc</h1><div class="sub">My 90-Day Winter Challenge</div><div class="d">HSC 2027 · STUDY · BODY · MIND</div></div><button class="btn gg full" data-google="onboarding" ${googleBusy?'disabled':''}>${googleBusy?'Connecting…':'Continue with Google'}</button>${googleMessage?`<div class="note" role="status">${escapeHtml(googleMessage)}</div>`:''}<div class="or">or</div><button class="btn full" data-ob="1">Continue without an account</button><div class="note" style="text-align:center">Sign in with Google to sync your progress across devices. You can also use the app without an account. The Google account chooser opens in your browser; Gmail app accounts may need to be signed in there once.</div><div class="d" style="text-align:center;margin-top:14px">Written by <b>CodeWithSiam</b> · Md Siam Ahmmed</div>`,
 `${dots}<h2>What should I call you?</h2><input type="text" id="on" placeholder="Your name" value="${escapeHTML(S.name||'')}"><button class="btn full" data-ob="1">Continue</button>`,
 `${dots}<h2>Your starting weight</h2><input type="number" id="ow" placeholder="Weight in kg" value="${escapeHTML(getp('mo.1.w0')||'')}"><div class="d">Target is 60 kg</div><button class="btn full" data-ob="1">Continue</button>`,
 `${dots}<h2>When is your HSC exam?</h2><input type="date" id="oh" value="${escapeHTML(S.hsc||'')}"><div class="d">Optional — it powers your countdown.</div><button class="btn full" data-ob="1">Continue</button>`,
@@ -619,6 +762,24 @@ const BN={'Home':'হোম','Alarms':'অ্যালার্ম','90-Day Arc'
 'Weekly Introspection':'সাপ্তাহিক আত্মসমীক্ষা','Every Friday night, # quiet minutes. Be honest, not harsh. # = weak, # = great.':'প্রতি শুক্রবার রাতে # মিনিট চুপচাপ বসো। নিজের সাথে সৎ হও, কঠোর নয়। # = দুর্বল, # = দারুণ।','Week':'সপ্তাহ','Study':'পড়াশোনা','Body · Gym + food':'শরীর · Gym + খাবার','Sleep':'ঘুম','Focus':'মনোযোগ','Avg weight kg':'গড় ওজন (kg)','Miss days':'Miss দিন','Weakest # topics':'সবচেয়ে দুর্বল # topic','Main error: Concept / Formula / Careless':'ভুলের কারণ: Concept / Formula / Careless','Win this week':'এই সপ্তাহের জয়','Biggest leak (where did time go?)':'সবচেয়ে বড় leak (সময় কোথায় গেল?)','Next week: # fix':'পরের সপ্তাহের #টা fix','Next week # targets':'পরের সপ্তাহের #টা target',
 'HSC # · # months full syllabus (Pareto #/#) · #→# kg · Salah + Sleep + Consistency':'HSC # · # মাসে full syllabus (Pareto #/#) · #→# kg · Salah + Sleep + Consistency','Daily budget & # non-negotiables':'দৈনিক সময় ও #টা non-negotiable','Weekly rotation (self-study)':'সাপ্তাহিক rotation (self-study)','#-week roadmap (tick when done)':'#-সপ্তাহের roadmap (শেষ হলে tick দাও)','Study system (Pareto)':'পড়ার system (Pareto)','Subject rules':'Subject-এর নিয়ম','Food plan (≈#–# kcal, protein #–#g)':'খাবারের plan (≈#–# kcal, protein #–#g)','Focus, tests & #+ checklist':'Focus, test ও #+ checklist','Chapter names are my reading of your PDF — match them to your textbook order.':'Chapter-এর নামগুলো তোমার PDF থেকে আমার পড়া — textbook-এর ক্রমের সাথে মিলিয়ে নিও।',
 'Continue with Google':'Google দিয়ে চালিয়ে যাও','Continue to next task':'পরের কাজে যাও','or':'অথবা','Sign in':'Sign in','Preview: the real Firebase login comes in the mobile app. Tap any button to continue.':'Preview: আসল Firebase login থাকবে mobile app-এ। যেকোনো button চাপলেই এগোবে।','Written by':'লেখক','What should I call you?':'তোমাকে কী নামে ডাকব?','Your name':'তোমার নাম','Your starting weight':'তোমার এখনকার ওজন','Weight in kg':'ওজন (kg)','Target is # kg':'Target # kg','When is your HSC exam?':'HSC পরীক্ষা কবে?','Optional — it powers your countdown.':'ঐচ্ছিক — countdown চালাতে লাগবে।','Why are you doing this?':'কেন এটা করছ?','Your # rule':'তোমার #টা নিয়ম','Continue':'এগোও','Edit plan':'প্ল্যান সম্পাদনা','Save plan':'প্ল্যান সংরক্ষণ','Edit weeks':'সপ্তাহ সম্পাদনা','Save weeks':'সপ্তাহ সংরক্ষণ','Cancel':'বাতিল','Begin Day # ❄️':'Day # শুরু করো ❄️'};
+Object.assign(BN,{
+ 'Alarm sound':'Alarm sound',
+ 'Test sound':'Sound test',
+ 'Stop sound':'Sound বন্ধ',
+ 'Digital sound selected.':'Digital sound বাছা হয়েছে।',
+ 'Chime sound selected.':'Chime sound বাছা হয়েছে।',
+ 'Sunrise sound selected.':'Sunrise sound বাছা হয়েছে।',
+ 'Zen Bowl sound selected.':'Zen Bowl sound বাছা হয়েছে।',
+ 'Siren sound selected.':'Siren sound বাছা হয়েছে।',
+ 'Alarm sound stopped.':'Alarm sound বন্ধ হয়েছে।',
+ 'This web app cannot reliably ring when the iPhone is locked, Safari is backgrounded, or the app is closed. Use the iPhone Clock app for dependable alarms.':'iPhone lock থাকলে, Safari background-এ গেলে বা app বন্ধ করলে এই web app নির্ভরযোগ্যভাবে alarm দিতে পারে না। নির্ভরযোগ্য alarm-এর জন্য iPhone Clock app ব্যবহার করুন।',
+ 'A countdown here only works while the page is active; iOS may pause it when the screen locks or you leave Safari. Use Clock for alarms while the phone is locked.':'Page active থাকলেই এই countdown চলে; screen lock করলে বা Safari ছাড়লে iOS এটি থামাতে পারে। ফোন lock থাকলে alarm-এর জন্য Clock ব্যবহার করুন।',
+ 'Timer running. Keep this page active; iOS may pause it when the screen locks or you leave Safari. Use Clock for a dependable locked-screen alarm.':'Timer চলছে। Page সক্রিয় রাখুন; screen lock করলে বা Safari ছাড়লে iOS এটি থামাতে পারে। ফোন lock থাকলে নির্ভরযোগ্য alarm-এর জন্য Clock ব্যবহার করুন।',
+ 'Native alarm alerts require notification permission. Test them on this device before relying on them.':'Native alarm alert-এর জন্য notification permission লাগবে। ভরসা করার আগে এই device-এ পরীক্ষা করুন।',
+'Choose a duration. A background notification can be scheduled when notification permission is enabled.':'সময় বেছে নিন। Notification permission থাকলে background notification schedule করা যাবে।',
+'Add as regular alarm':'সাধারণ alarm হিসেবে যোগ করুন',
+'Add the selected duration as a clock alarm; choose repeat days in the next screen. Without repeat days, it rings once.':'নির্বাচিত সময়কে clock alarm হিসেবে যোগ করুন; পরের screen-এ repeat দিন বাছুন। Repeat না দিলে একবারই বাজবে।'
+});
 const O=new WeakMap();
 function trN(o){const nums=[];const c=o.replace(/\d+(\.\d+)?/g,x=>{nums.push(x);return '#'});const m=c.match(/^(\s*)([^\p{L}\p{N}#+\-]*)([\s\S]*?)(\s*)$/u);const v=BN[m[3]];if(!v)return o;let i=0;return m[1]+m[2]+v.replace(/#/g,()=>nums[i++]??'')+m[4]}
 function loc(r){const bn=S.lang=='bn';let ns=[];if(r.nodeType==3)ns=[r];else{const w=document.createTreeWalker(r,NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode())ns.push(n)}
@@ -701,7 +862,8 @@ if(t.closest('[data-set]')){$('set').classList.add('s');drawSet();loc($('set'))}
 else if(l){S.smLim=Math.max(5,Math.min(120,S.smLim+ +l.dataset.lm));persist();drawSM();drawSet()}
 else if(b){const a=b.dataset.sm;if(a=='start')smStart();else if(a=='stop')smStop();else{smSync().used+=300;persist();drawSM();if(smUsed()>=S.smLim*60)smLock()}}});
 Object.assign(BN,{'Language':'ভাষা','App language':'অ্যাপের ভাষা','Choose your preferred app language.':'অ্যাপের পছন্দের ভাষা বেছে নাও','Social media today':'আজকের social media','Start session':'Session শুরু করো','Stop timer':'Timer থামাও','+# min used elsewhere':'অন্য জায়গায় +# মিনিট গেছে','Limit reached':'Limit শেষ','Used # of # min':'ব্যবহার # / # মিনিট','Start the timer before you open a social app. It rings when your limit is up.':'Social app খোলার আগে timer চালাও। limit শেষ হলে বাজবে।','No more social media today. Come back tomorrow.':'আজ আর social media নয়। কাল আবার।','Start now':'এখনই শুরু করো','Settings':'সেটিংস','Cover photo':'Cover ছবি','Reset':'রিসেট','Close':'বন্ধ করো','Social media limit':'Social media limit','# min per day':'প্রতিদিন # মিনিট','Shown behind your day counter on Home.':'Home-এর day counter-এর পেছনে দেখা যাবে।','Time is up':'সময় শেষ','Done, I closed it':'বন্ধ করেছি','Custom countdown':'নিজের মতো countdown','Minutes':'মিনিট','Seconds':'সেকেন্ড','Start timer':'Timer শুরু করো','Cancel timer':'Timer বাতিল','Timer running':'Timer চলছে','Time is up.':'সময় শেষ।','Choose a duration from # second to # hours.':'# সেকেন্ড থেকে # ঘণ্টার সময় বেছে নাও।','Continue with Google':'Google দিয়ে চালিয়ে যাও','Continue without an account':'অ্যাকাউন্ট ছাড়া চালিয়ে যাও','Connecting…':'সংযোগ হচ্ছে…','Sign in with Google to sync your progress across devices. You can also use the app without an account.':'সব ডিভাইসে অগ্রগতি sync করতে Google দিয়ে sign in করো। অ্যাকাউন্ট ছাড়াও app ব্যবহার করতে পারো।'});
+BN['The Google account chooser opens in your browser; Gmail app accounts may need to be signed in there once.']='Google account বাছাই browser-এ খুলবে; Gmail app-এর account browser-এ একবার sign in করতে হতে পারে।';
 
-renderAll();$('add').style.display='none';ob();if(S.lang=='bn')loc(document.body);setupNativeAlarms();if(countdown){if(countdown.dueAt<=Date.now())finishCountdown();else{renderCountdown();countdownTicker=setInterval(renderCountdown,1000)}}
+renderAll();$('add').style.display='none';ob();if(S.lang=='bn')loc(document.body);updateConnectionNotice();updateAlarmPlatformGuidance();setupNativeAlarms();if(countdown){if(countdown.dueAt<=Date.now())finishCountdown();else{renderCountdown();countdownTicker=setInterval(renderCountdown,1000)}}
 initFirebase();
 </script><script>if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(e=>console.error('Could not register the Winter Arc offline app:',e));</script></body></html>

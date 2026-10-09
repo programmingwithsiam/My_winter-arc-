@@ -8,6 +8,7 @@ await Promise.all([
   copyFile('firebase-config.js', 'www/firebase-config.js'),
   copyFile('manifest.webmanifest', 'www/manifest.webmanifest'),
   copyFile('sw.js', 'www/sw.js'),
+  copyFile('offline.html', 'www/offline.html'),
   copyFile('icon.svg', 'www/icon.svg'),
   copyFile('icon-192.png', 'www/icon-192.png'),
   copyFile('icon-512.png', 'www/icon-512.png')

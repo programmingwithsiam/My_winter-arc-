@@ -29,26 +29,36 @@ Spark plan-এ Firebase quota-এর সীমা আছে; Firebase Console-�
 
 ## Alarm notification
 
-Alarms tab-এর **Custom countdown**-এ মিনিট/সেকেন্ড বেছে নিয়ে নিজের timer চালান (1 সেকেন্ড থেকে 24 ঘণ্টা); 1, 4, 5, 10, 25 মিনিটের quick option-ও আছে। Native Android/iOS app-এ notification permission থাকলে background countdown notification schedule হয়। App সামনে থাকলে সময় শেষ হলে ringing UI আসে। Browser/PWA-তে tab খোলা রাখুন—browser বন্ধ থাকলে web app timer জাগিয়ে alarm দেওয়ার নিশ্চয়তা দিতে পারে না।
+Alarms tab-এর **Custom countdown**-এ মিনিট/সেকেন্ড বেছে নিয়ে নিজের timer চালান (1 সেকেন্ড থেকে 24 ঘণ্টা); 1, 4, 5, 10, 25 মিনিটের quick option-ও আছে। Native Android/iOS app-এ notification permission থাকলে background countdown notification schedule হয়। App সামনে থাকলে সময় শেষ হলে ringing UI আসে। iPhone PWA-তে screen lock করলে, Safari background-এ গেলে বা app বন্ধ করলে iOS timer থামাতে/সাসপেন্ড করতে পারে; locked-screen alarm-এর জন্য iPhone Clock ব্যবহার করুন।
+
+Browser/PWA-তে **Alarm sound** থেকে Digital, Chime, Sunrise, Zen Bowl বা Siren বেছে **Test sound** দিয়ে শুনুন; **Stop sound** বাজা থামায়। Custom countdown শেষ হলে নির্বাচিত সাউন্ডটি app খোলা ও সক্রিয় থাকা অবস্থায় বাজে। iOS 15 Safari/PWA screen lock বা background-এ গেলে অডিও থেমে যেতে পারে; নির্ভরযোগ্য locked-screen alarm-এর জন্য iPhone Clock ব্যবহার করুন। Native app-এর background notification device-এর notification sound ব্যবহার করে।
 
 Regular alarm-এর জন্য **Enable / check alarm permissions** button চাপুন এবং device-এর notification permission দিন। Android-এ সময় যতটা সম্ভব নির্ভুল রাখতে **Alarms & reminders / exact alarms** access-ও দিন। App active থাকলে alarm-এর সময় full-screen ringing UI দেখাবে। App background/বন্ধ থাকলে, screen locked থাকলেও, iOS/Android-এর নিজস্ব notification sound ও alert আসবে; সেটি tap করলে app-এর ringing UI খুলবে। Phone সম্পূর্ণ power off বা battery শেষ থাকলে কোনো app alarm বাজাতে পারে না। iOS/Android-এর notification-ও system alert—এটি সবসময় clock app-এর মতো screen জাগিয়ে full-screen দেখানো বা বন্ধ না করা পর্যন্ত বাজানো নিশ্চিত করতে পারে না।
 
 মোবাইল OS notification-এর permission বন্ধ রাখতে পারে, battery saver সময় পিছিয়ে দিতে পারে, এবং OS একসাথে pending notification-এর সংখ্যা সীমিত করে (বিশেষ করে iOS-এ 64টি)। তাই app ফের খুললে সামনের alarm-গুলো আবার schedule হয়। এই UI native notification-কে full-screen alarm হিসেবে lock screen-এর উপর জোর করে দেখাতে পারে না—এটি iOS/Android-এর নিয়মে সীমিত।
 
-## Mac ছাড়া iPhone-এ ব্যবহার (PWA)
+## iPhone 6s (iOS 15)-এ install ও offline ব্যবহার
 
-Linux-এ iOS-এর native `.ipa` তৈরি করা যায় না—তার জন্য macOS ও Xcode দরকার। Mac ছাড়া iPhone-এ app-এর মতো install করার জন্য PWA প্রস্তুত করা হয়েছে। `www/` build output-টি Firebase Hosting-এর HTTPS URL-এ publish করুন:
+এই existing app-টিকে PWA হিসেবে Firebase Hosting-এ publish করা যায়; HTTPS hosting-এর জন্য আলাদা domain বা paid plan দরকার নেই। `www/` হচ্ছে build output, আর `firebase.json`-এ Firebase Hosting সেট করা আছে। Firebase project-এ Hosting enable করে:
 
 ```sh
 npm run build
 npx firebase-tools login
-npx firebase-tools use --add
 npx firebase-tools deploy --only hosting
 ```
 
-`use --add`-এ Firebase project বেছে নিন। Hosting-এ প্রকাশের পর iPhone-এ Safari দিয়ে পাওয়া HTTPS link খুলে **Share → Add to Home Screen → Add** চাপুন। এরপর Home Screen-এর Winter Arc icon থেকে standalone app হিসেবে খুলবে। Service worker app shell cache করে, তাই আগে একবার online-এ খুলে রাখলে পরে offline-এও app খোলা যায়। App data সেই iPhone/browser-এ local save হবে; Firebase web config set করলে account-based cloud sync-ও enable হবে.
+`npx firebase-tools use` দিয়ে সঠিক Firebase project নির্বাচিত আছে কি না দেখে নিন। Project alias না থাকলে `npx firebase-tools use --add` চালিয়ে project বেছে নিন। iPhone-এ প্রথমবার setup করতে:
 
-PWA notification-গুলো native clock alarm-এর বিকল্প নয়: browser-এ app বন্ধ থাকলে scheduled local alarm নিশ্চিত করা যায় না। Screen lock থাকলেও, notification permission এবং OS support লাগবে; native background scheduling-এর জন্য Android/iOS app build দরকার। ফোন বন্ধ বা battery শেষ থাকলে alarm বাজবে না।
+1. iOS 15-এর **Safari**-তে deployed HTTPS URL খুলুন এবং page পুরো load হওয়া পর্যন্ত online থাকুন।
+2. Safari-র **Share** button চাপুন, **Add to Home Screen**, তারপর **Add** চাপুন।
+3. Home Screen-এর **Winter Arc** icon একবার online অবস্থায় খুলে load সম্পূর্ণ হতে দিন। এতে service worker app shell ও essential static files cache করবে।
+4. এরপর Airplane Mode চালু করে Home Screen app icon থেকে app বন্ধ করে আবার খুলুন। Home, Alarms, Plan, Weeks এবং saved progress পরীক্ষা করুন।
+
+Service worker fixed allowlist-এর public app shell/resources cache করে; arbitrary same-origin response বা Firebase/API request cache করে না। Google Sign-In, Firebase cloud read/write/sync এবং internet-নির্ভর Firebase features offline-এ কাজ করে না। Offline-এ progress এই device-এ locally save হয়; connectivity ফিরলে signed-in account-এর cloud sync retry হয়। Offline fallback page connection প্রয়োজনীয় তথ্য দেখায়। Google Fonts offline-এ নাও আসতে পারে—system font fallback ব্যবহার হয়। iOS service worker cache OS মুছে দিতে পারে; তাই নিয়মিত online খুলুন এবং backup export রাখুন।
+
+**Offline test:** Safari-তে app online খুলে service worker install/activate হতে দিন এবং Home Screen app-টি online-এ একবার load করুন। তারপর Airplane Mode চালু করে app বন্ধ করে আবার খুলুন। Local changes save হয় কি না দেখুন; Firebase sign-in/sync offline-এ কাজ করবে না, reconnect করার পর sync হওয়া যাচাই করুন। এই test app shell ও local-save behavior যাচাই করে; Firebase cloud features এবং background alarms offline-compatible নয়।
+
+PWA notification-গুলো native clock alarm-এর বিকল্প নয়: browser-এ app বন্ধ থাকলে scheduled local alarm নিশ্চিত করা যায় না। Screen lock থাকলেও, notification permission এবং OS support লাগবে; native background scheduling-এর জন্য Android/iOS app দরকার। ফোন বন্ধ বা battery শেষ থাকলে alarm বাজবে না। Linux-এ iOS native `.ipa` build করা যায় না—তার জন্য macOS ও Xcode দরকার।
 
 ## Android ও iOS চালানো
 
